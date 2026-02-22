@@ -8,17 +8,21 @@ interface HomeResultsProps {
 }
 
 function formatPrice(price: number): string {
-  if (price >= 100000000) {
-    return `${(price / 100000000).toFixed(1)}억`;
+  // Input is already in 만원 unit from calculator
+  if (price >= 1000) {
+    // Convert to 억 (100M won = 10000 만원)
+    return `${(price / 10000).toFixed(1)}억`;
   }
-  return `${(price / 10000000).toFixed(1)}천만`;
+  // 천만 (10M won = 1000 만원)
+  return `${(price / 100).toFixed(0)}천만`;
 }
 
 function formatWon(won: number): string {
-  if (won >= 10000) {
-    return `${Math.floor(won / 10000).toLocaleString()}만원`;
+  // Input is already in 만원 unit from calculator
+  if (won >= 100) {
+    return `${Math.floor(won).toLocaleString()}만원`;
   }
-  return `${Math.floor(won).toLocaleString()}원`;
+  return `${Math.floor(won * 10000).toLocaleString()}원`;
 }
 
 export default function HomeResults({ result }: HomeResultsProps) {

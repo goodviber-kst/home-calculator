@@ -23,6 +23,13 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
     loanTermYears: 30,
   });
 
+  const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    // Remove leading zeros but allow single "0"
+    const cleaned = value === '' ? '' : String(parseInt(value) || 0);
+    return cleaned;
+  };
+
   const [error, setError] = useState<string>('');
 
   const handleChange = (
@@ -36,7 +43,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
         type === 'checkbox'
           ? (e.target as HTMLInputElement).checked
           : type === 'number'
-            ? Number(value)
+            ? value === '' ? 0 : Math.max(0, parseInt(value) || 0)
             : value,
     }));
 
@@ -105,7 +112,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              신청자 월소득 (만원)*
+              신청자 월소득 (만원, 세전)*
             </label>
             <input
               type="number"
@@ -117,12 +124,13 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="예: 400"
             />
+            <p className="text-xs text-gray-500 mt-1">세전 기준 월급여를 입력해주세요</p>
           </div>
 
           {input.isCouple && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                배우자 월소득 (만원)
+                배우자 월소득 (만원, 세전)
               </label>
               <input
                 type="number"
@@ -134,6 +142,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="예: 300"
               />
+              <p className="text-xs text-gray-500 mt-1">세전 기준 월급여를 입력해주세요</p>
             </div>
           )}
         </div>
@@ -150,7 +159,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              현재 저축액
+              현재 저축액 (현금화 가능 자산)
             </label>
             <input
               type="number"
@@ -162,6 +171,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="예: 5000"
             />
+            <p className="text-xs text-gray-500 mt-1">예: 은행 예금, 매도 가능 주식, 정기예금 등</p>
           </div>
 
           <div>
@@ -194,22 +204,24 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="예: 0"
             />
+            <p className="text-xs text-gray-500 mt-1">예: 자동차, 보험 환급금, 상속 예정액 등</p>
           </div>
         </div>
       </div>
 
-      {/* Section 3: Additional Costs */}
+      {/* Section 3: Contingency Costs */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <span className="bg-orange-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">
             3
           </span>
-          추가 비용 (만원)
+          여유 비용 (만원)
         </h2>
+        <p className="text-sm text-gray-600 mb-4">예측하지 못한 비용을 대비하기 위해 미리 남겨둘 금액입니다. (취득세 포함)</p>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              여유자금 (기본값: 1,000만원)
+              긴급 자금 (기본값: 1,000만원)
             </label>
             <input
               type="number"
@@ -220,6 +232,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               step="100"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <p className="text-xs text-gray-500 mt-1">계약금 미지급, 긴급 수리 등에 대비한 여유자금</p>
           </div>
 
           <div>
@@ -239,7 +252,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              이사비 (기본값: 100만원)
+              이사 및 생활용품 비용 (기본값: 100만원)
             </label>
             <input
               type="number"
