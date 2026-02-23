@@ -2,8 +2,10 @@
 export interface HomeCalculatorInput {
   // Section 1: Personal Info
   isCouple: boolean;
-  applicantIncome: number; // 만원
-  spouseIncome: number; // 만원
+  applicantIncome: number; // 세후 월소득 (만원)
+  applicantPreTaxAnnual: number; // 세전 연봉 (만원) — DSR/생애최초용
+  spouseIncome: number; // 배우자 세후 월소득 (만원)
+  spousePreTaxAnnual: number; // 배우자 세전 연봉 (만원) — DSR/생애최초용
 
   // Section 2: Assets
   savings: number; // 만원
@@ -37,6 +39,7 @@ export interface LoanInfo {
   maxLoan: number; // 최종 최대 대출 = min(LTV, DSR)
   monthlyPaymentMin: number; // 최소 월 상환액 (금리 낮을 때)
   monthlyPaymentMax: number; // 최대 월 상환액 (금리 높을 때)
+  loanTermYears: number; // 대출 기간 (년)
 }
 
 export interface GovernmentLoanProduct {
@@ -60,8 +63,10 @@ export interface RegionalFeasibility {
 
 export interface CalculationResult {
   // Input summary
-  monthlyIncomeCouple: number; // 부부합산 월소득
-  annualIncomeCouple: number; // 부부합산 연소득
+  monthlyIncomeCouple: number; // 부부합산 월소득 (세후)
+  annualIncomeCouple: number; // 부부합산 연소득 (세후)
+  totalPreTaxAnnual: number; // 부부합산 세전 연봉
+  monthlyIncomeAfterTax: number; // 합산 세후 월소득 (30% 경고용)
   isFirstTimeEligible: boolean; // 생애최초 감면 대상 여부
 
   // Assets & Costs
@@ -76,9 +81,13 @@ export interface CalculationResult {
   acquisitionTax: AcquisitionTaxBreakdown;
 
   // Purchase Power
-  conservativePrice: number; // 보수적 (가용 예산만)
+  conservativePrice: number; // 보수적 (가용 예산 + 적정 대출)
   recommendedPrice: number; // 권장 (가용 예산 + 최대 대출)
   optimisticPrice: number; // 낙관적 (가용 예산 + DSR 최대)
+
+  // Payment Burden
+  isPaymentHeavy: boolean; // 월상환액 > 세후 월소득 30%
+  paymentRatioPercent: number; // 상환 비율 (%)
 
   // Government Loans
   governmentLoans: GovernmentLoanProduct[];

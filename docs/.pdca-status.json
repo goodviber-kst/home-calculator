@@ -1,0 +1,353 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-02-23T00:05:24.688Z",
+  "activeFeatures": [
+    "saju-analysis",
+    "analyze",
+    "home-calculator",
+    "calculate"
+  ],
+  "primaryFeature": "saju-analysis",
+  "features": {
+    "saju-analysis": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-22T11:56:09.224Z",
+        "lastUpdated": "2026-02-22T12:19:46.278Z"
+      },
+      "lastFile": "/Users/user/study/saju-analysis/next.config.ts"
+    },
+    "analyze": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-22T11:56:27.855Z",
+        "lastUpdated": "2026-02-22T11:56:27.855Z"
+      },
+      "lastFile": "/Users/user/saju-analysis/app/api/analyze/route.ts"
+    },
+    "home-calculator": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-22T13:09:55.333Z",
+        "lastUpdated": "2026-02-23T00:05:24.688Z"
+      },
+      "lastFile": "/Users/user/study/home-calculator/components/HomeResults.tsx"
+    },
+    "calculate": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-02-22T13:10:36.672Z",
+        "lastUpdated": "2026-02-22T13:10:36.672Z"
+      },
+      "lastFile": "/Users/user/study/home-calculator/app/api/calculate/route.ts"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-02-22T08:57:50.130Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-02-23T00:05:24.688Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-02-22T11:56:09.224Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:23.785Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:27.855Z",
+      "feature": "analyze",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:36.809Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:41.530Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:45.121Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:48.214Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:50.378Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:56:55.628Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:57:00.811Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T11:57:08.202Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T12:19:18.541Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T12:19:39.639Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T12:19:46.278Z",
+      "feature": "saju-analysis",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:09:55.333Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:09:55.528Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:09:55.766Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:10:07.111Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:10:31.405Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:10:36.672Z",
+      "feature": "calculate",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:10:40.122Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:11:04.227Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:11:24.913Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:11:36.120Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:11:39.927Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:35:23.740Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:35:28.238Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:35:35.165Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:35:40.146Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:35:51.059Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:36:00.569Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:36:10.763Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-22T13:36:17.310Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:03:57.071Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:01.308Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:08.170Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:16.697Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:19.641Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:26.485Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:33.324Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:53.934Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:04:58.030Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:05:07.304Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:05:12.672Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:05:17.399Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-23T00:05:24.688Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}

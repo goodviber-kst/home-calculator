@@ -91,9 +91,30 @@ export default function HomeResults({ result }: HomeResultsProps) {
             {formatWon(result.loanInfo.monthlyPaymentMax)}
           </div>
           <div className="text-sm opacity-90 space-y-1 mt-3">
-            <div>• 금리 2.65% 시: {formatWon(result.loanInfo.monthlyPaymentMin)}</div>
-            <div>• 금리 6.00% 시: {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
-            <div>• 대출 기간: {result.loanInfo.monthlyPaymentMax} 년</div>
+            <div>• 금리 3.3% 시: {formatWon(result.loanInfo.monthlyPaymentMin)}</div>
+            <div>• 금리 4.5% 시: {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
+            <div>• 대출 기간: {result.loanInfo.loanTermYears} 년</div>
+            {result.isPaymentHeavy && (
+              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                <div className="text-red-100 font-semibold">
+                  🔴 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 다소 무리일 수 있어요
+                </div>
+              </div>
+            )}
+            {!result.isPaymentHeavy && result.paymentRatioPercent >= 20 && (
+              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                <div className="text-yellow-100 font-semibold">
+                  🟡 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 적정 수준
+                </div>
+              </div>
+            )}
+            {result.paymentRatioPercent < 20 && (
+              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                <div className="text-green-100 font-semibold">
+                  🟢 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 여유 있는 수준
+                </div>
+              </div>
+            )}
           </div>
         </ResultCard>
 

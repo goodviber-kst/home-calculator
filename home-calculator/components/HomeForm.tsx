@@ -11,8 +11,10 @@ interface HomeFormProps {
 export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps) {
   const [input, setInput] = useState<HomeCalculatorInput>({
     isCouple: false,
-    applicantIncome: 400,
+    applicantIncome: 300, // 세후 월 300만원
+    applicantPreTaxAnnual: 5000, // 세전 연봉 5000만원
     spouseIncome: 0,
+    spousePreTaxAnnual: 0,
     savings: 5000,
     parentGift: 0,
     otherAssets: 0,
@@ -56,12 +58,22 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
     // Validation
     if (!input.applicantIncome || input.applicantIncome <= 0) {
-      setError('신청자 월소득을 입력해주세요.');
+      setError('신청자 세후 월소득을 입력해주세요.');
       return;
     }
 
-    if (input.isCouple && (!input.spouseIncome || input.spouseIncome < 0)) {
-      setError('배우자 월소득을 입력해주세요.');
+    if (!input.applicantPreTaxAnnual || input.applicantPreTaxAnnual <= 0) {
+      setError('신청자 세전 연봉을 입력해주세요.');
+      return;
+    }
+
+    if (input.isCouple && (!input.spouseIncome || input.spouseIncome <= 0)) {
+      setError('배우자 세후 월소득을 입력해주세요.');
+      return;
+    }
+
+    if (input.isCouple && (!input.spousePreTaxAnnual || input.spousePreTaxAnnual <= 0)) {
+      setError('배우자 세전 연봉을 입력해주세요.');
       return;
     }
 
@@ -110,39 +122,78 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
             </label>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              신청자 월소득 (만원, 세전)*
-            </label>
-            <input
-              type="number"
-              name="applicantIncome"
-              value={input.applicantIncome}
-              onChange={handleChange}
-              min="0"
-              step="10"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="예: 400"
-            />
-            <p className="text-xs text-gray-500 mt-1">세전 기준 월급여를 입력해주세요</p>
-          </div>
-
-          {input.isCouple && (
+          {/* 신청자 소득 */}
+          <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="text-sm font-semibold text-gray-700">신청자 소득</div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                배우자 월소득 (만원, 세전)
+                세후 월소득 (만원)*
               </label>
               <input
                 type="number"
-                name="spouseIncome"
-                value={input.spouseIncome}
+                name="applicantIncome"
+                value={input.applicantIncome}
                 onChange={handleChange}
                 min="0"
                 step="10"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="예: 300"
               />
-              <p className="text-xs text-gray-500 mt-1">세전 기준 월급여를 입력해주세요</p>
+              <p className="text-xs text-gray-500 mt-1">실수령액 (세금 제외)</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                세전 연봉 (만원)*
+              </label>
+              <input
+                type="number"
+                name="applicantPreTaxAnnual"
+                value={input.applicantPreTaxAnnual}
+                onChange={handleChange}
+                min="0"
+                step="100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="예: 5000"
+              />
+              <p className="text-xs text-gray-500 mt-1">세전 연간 급여 (DSR 계산용)</p>
+            </div>
+          </div>
+
+          {input.isCouple && (
+            <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="text-sm font-semibold text-gray-700">배우자 소득</div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  세후 월소득 (만원)
+                </label>
+                <input
+                  type="number"
+                  name="spouseIncome"
+                  value={input.spouseIncome}
+                  onChange={handleChange}
+                  min="0"
+                  step="10"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="예: 250"
+                />
+                <p className="text-xs text-gray-500 mt-1">실수령액 (세금 제외)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  세전 연봉 (만원)
+                </label>
+                <input
+                  type="number"
+                  name="spousePreTaxAnnual"
+                  value={input.spousePreTaxAnnual}
+                  onChange={handleChange}
+                  min="0"
+                  step="100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="예: 4000"
+                />
+                <p className="text-xs text-gray-500 mt-1">세전 연간 급여 (DSR 계산용)</p>
+              </div>
             </div>
           )}
         </div>
@@ -308,6 +359,29 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               <option value={20}>20년</option>
               <option value={30}>30년</option>
             </select>
+          </div>
+        </div>
+
+        {/* Interest Rate Info Box */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="text-sm font-semibold text-blue-900 mb-3">📊 현재 주요 금리 안내 (2025-2026 기준)</div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="border border-blue-300 rounded px-2 py-2">
+              <div className="text-blue-900 font-medium">디딤돌 대출</div>
+              <div className="text-blue-700">2.65% ~ 3.95%</div>
+            </div>
+            <div className="border border-blue-300 rounded px-2 py-2">
+              <div className="text-blue-900 font-medium">보금자리론</div>
+              <div className="text-blue-700">3.8%</div>
+            </div>
+            <div className="border border-blue-300 rounded px-2 py-2">
+              <div className="text-blue-900 font-medium">일반 주담대</div>
+              <div className="text-blue-700">4.0% ~ 5.5%</div>
+            </div>
+            <div className="border border-blue-300 rounded px-2 py-2">
+              <div className="text-blue-900 font-medium">계산기 기준</div>
+              <div className="text-blue-700">3.3% ~ 4.5%</div>
+            </div>
           </div>
         </div>
       </div>

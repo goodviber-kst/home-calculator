@@ -7,33 +7,36 @@ import {
   RegionalFeasibility,
 } from './types';
 
-// Calculate acquisition tax (취득세)
+// Calculate acquisition tax (취득세) — 모든 값 만원 단위
 export function calculateAcquisitionTax(
-  purchasePrice: number,
+  purchasePrice: number, // 만원 단위
   isFirstTime: boolean
 ): AcquisitionTaxBreakdown {
-  // Basic tax calculation: 2024-2026 rules
+  // Basic tax calculation: 2024-2026 rules (누진 계산)
   let baseTax = 0;
-  if (purchasePrice < 600000000) {
-    baseTax = purchasePrice * 0.01; // 1%
-  } else if (purchasePrice < 900000000) {
-    baseTax = 600000000 * 0.01 + (purchasePrice - 600000000) * 0.03; // 1% + 2%
+  if (purchasePrice < 60000) {
+    // 6억 미만: 1%
+    baseTax = purchasePrice * 0.01;
+  } else if (purchasePrice < 90000) {
+    // 6억~9억: 6억까지 1%, 초과분 2%
+    baseTax = 60000 * 0.01 + (purchasePrice - 60000) * 0.02;
   } else {
-    baseTax = purchasePrice * 0.03; // 3%
+    // 9억 이상: 6억까지 1%, 6억~9억은 2%, 9억 초과분 3%
+    baseTax = 60000 * 0.01 + 30000 * 0.02 + (purchasePrice - 90000) * 0.03;
   }
 
   // Education tax: 10% of base tax
   const educationTax = baseTax * 0.1;
 
   // Rural tax: 0.2% (MVP excludes this)
-  const specialTax = 0; // purchasePrice > 85m² ? purchasePrice * 0.002 : 0;
+  const specialTax = 0;
 
   const subtotal = baseTax + educationTax + specialTax;
 
-  // First-time buyer exemption
+  // First-time buyer exemption (만원 단위)
   let exemption = 0;
   if (isFirstTime) {
-    exemption = Math.min(subtotal, 2000000); // max 200만원
+    exemption = Math.min(subtotal, 200); // max 200만원
   }
 
   const finalTax = subtotal - exemption;
@@ -106,22 +109,22 @@ function calculateMaxLoanByDSR(
   );
 }
 
-// Check first-time buyer eligibility
+// Check first-time buyer eligibility (만원 단위)
 function isFirstTimeBuyerEligible(
-  annualIncome: number,
+  annualIncome: number, // 만원 단위 세전 연봉
   isCouple: boolean
 ): boolean {
   if (isCouple) {
-    return annualIncome <= 70000000; // 7천만원
+    return annualIncome <= 7000; // 7천만원
   } else {
-    return annualIncome <= 50000000; // 5천만원
+    return annualIncome <= 5000; // 5천만원
   }
 }
 
-// Get government loan products
+// Get government loan products (만원 단위)
 function getGovernmentLoans(
-  purchasePrice: number,
-  annualIncome: number,
+  purchasePrice: number, // 만원 단위
+  annualIncome: number, // 만원 단위 세전 연봉
   isCouple: boolean,
   isFirstTime: boolean
 ): GovernmentLoanProduct[] {
@@ -136,9 +139,9 @@ function getGovernmentLoans(
     interestRate: '2.65%~3.95%',
     eligible:
       isFirstTime &&
-      ((isCouple && annualIncome <= 70000000) ||
-        (!isCouple && annualIncome <= 60000000)) &&
-      purchasePrice <= 500000000,
+      ((isCouple && annualIncome <= 7000) ||
+        (!isCouple && annualIncome <= 6000)) &&
+      purchasePrice <= 50000, // 5억 (만원 단위)
   };
   loans.push(didimdol);
 
@@ -149,7 +152,7 @@ function getGovernmentLoans(
     priceLimit: '6억 이하',
     ltv: 0.7,
     interestRate: '3.8%',
-    eligible: purchasePrice <= 600000000,
+    eligible: purchasePrice <= 60000, // 6억 (만원 단위)
   };
   loans.push(bogeumjari);
 
@@ -167,9 +170,9 @@ function getGovernmentLoans(
   return loans;
 }
 
-// Get regional feasibility
+// Get regional feasibility (만원 단위)
 function getRegionalFeasibility(
-  maxBudget: number,
+  maxBudget: number, // 만원 단위
   isFirstTime: boolean
 ): RegionalFeasibility[] {
   const regions: RegionalFeasibility[] = [
@@ -212,7 +215,7 @@ function getRegionalFeasibility(
     r.maxPriceByLTV = maxBudget / (1 - ltv);
     r.feasible = r.maxPriceByLTV > 0;
     r.reason = r.feasible
-      ? `최대 ${Math.floor(r.maxPriceByLTV / 10000000)}억원 구매 가능`
+      ? `최대 ${(r.maxPriceByLTV / 10000).toFixed(1)}억원 구매 가능`
       : '조건 미충족';
     return r;
   });
@@ -220,34 +223,41 @@ function getRegionalFeasibility(
 
 // Main calculation function
 export function calculate(input: HomeCalculatorInput): CalculationResult {
-  // 1. Calculate monthly and annual income
+  // 1. Calculate monthly and annual income (세후)
   const monthlyIncomeCouple = input.isCouple
     ? input.applicantIncome + input.spouseIncome
     : input.applicantIncome;
   const annualIncomeCouple = monthlyIncomeCouple * 12;
 
-  // 2. Check first-time buyer eligibility
+  // 2. Calculate pre-tax annual income (세전 연봉) for DSR and first-time eligibility
+  const totalPreTaxAnnual = input.isCouple
+    ? input.applicantPreTaxAnnual + input.spousePreTaxAnnual
+    : input.applicantPreTaxAnnual;
+
+  // 3. Check first-time buyer eligibility using pre-tax annual income
   const isFirstTime = isFirstTimeBuyerEligible(
-    annualIncomeCouple,
+    totalPreTaxAnnual,
     input.isCouple
   );
 
-  // 3. Calculate total assets
+  // 4. Calculate total assets
   const totalAssets = input.savings + input.parentGift + input.otherAssets;
 
-  // 4. Calculate LTV by region
+  // 5. Calculate LTV by region
   const ltv = getLTVByRegion(input.targetRegion, isFirstTime);
 
-  // 5. Calculate registration fee (0.4%)
+  // 6. Calculate registration fee (0.4%)
   const registrationFeeRate = 0.004;
 
   // Iterate to find stable purchase price (acquisition tax depends on price)
-  let purchasePrice = 400000000; // Start with 4억
+  // 만원 단위로 통일
+  let purchasePrice = 40000; // Start with 4억 (만원 단위)
   let acquisitionTax: AcquisitionTaxBreakdown;
   let previousPrice = 0;
   let iterations = 0;
 
-  while (Math.abs(purchasePrice - previousPrice) > 1000000 && iterations < 10) {
+  while (Math.abs(purchasePrice - previousPrice) > 100 && iterations < 10) {
+    // 100만원 수렴 임계값
     previousPrice = purchasePrice;
     acquisitionTax = calculateAcquisitionTax(purchasePrice, isFirstTime);
     const registrationFee = purchasePrice * registrationFeeRate;
@@ -261,12 +271,12 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
     const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
-    // Calculate max loan
+    // Calculate max loan using pre-tax annual income for DSR
     const maxLoanByDSR = calculateMaxLoanByDSR(
-      annualIncomeCouple,
+      totalPreTaxAnnual,
       input.loanTermYears
     );
-    const maxLoanByLTV = availableBudget / (1 - ltv); // = (available / (1-LTV)) - available
+    const maxLoanByLTV = availableBudget / (1 - ltv);
 
     purchasePrice = availableBudget + Math.min(maxLoanByLTV, maxLoanByDSR);
     iterations++;
@@ -275,7 +285,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   acquisitionTax = calculateAcquisitionTax(purchasePrice, isFirstTime);
   const registrationFee = purchasePrice * registrationFeeRate;
 
-  // 6. Final cost calculation
+  // 7. Final cost calculation
   const totalDeductions =
     input.emergencyFund +
     input.interiorCost +
@@ -285,40 +295,49 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
   const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
-  // 7. Calculate max loans
+  // 8. Calculate max loans using pre-tax annual income for DSR
   const maxLoanByDSR = calculateMaxLoanByDSR(
-    annualIncomeCouple,
+    totalPreTaxAnnual,
     input.loanTermYears
   );
   const maxLoanByLTV = (availableBudget * ltv) / (1 - ltv);
   const maxLoan = Math.min(maxLoanByLTV, maxLoanByDSR);
 
-  // 8. Calculate payment amounts
+  // 9. Calculate payment amounts with narrowed interest rate range (3.3% - 4.5%)
   const monthlyPaymentMin = calculateMonthlyPayment(
     maxLoan,
-    0.0265, // 디딤돌 최저 금리
+    0.033, // 3.3% (현실적 최저)
     input.loanTermYears
   );
   const monthlyPaymentMax = calculateMonthlyPayment(
     maxLoan,
-    0.06, // 일반 최고 금리
+    0.045, // 4.5% (현실적 최고)
     input.loanTermYears
   );
 
-  // 9. Calculate purchase prices
-  const conservativePrice = availableBudget;
+  // 10. Calculate purchase prices
+  // 보수적 가격: 대출 포함 (최대대출의 50% 또는 DSR 한도의 25% 중 작은 값)
+  const modestLoan = Math.min(maxLoan * 0.5, maxLoanByDSR * 0.25);
+  const conservativePrice = availableBudget + modestLoan;
   const recommendedPrice = availableBudget + maxLoan;
   const optimisticPrice = availableBudget + maxLoanByDSR;
 
-  // 10. Get government loans
+  // 11. Calculate payment burden
+  const monthlyIncomeAfterTax = monthlyIncomeCouple;
+  const isPaymentHeavy = monthlyIncomeAfterTax > 0 && (monthlyPaymentMin / monthlyIncomeAfterTax) > 0.30;
+  const paymentRatioPercent = monthlyIncomeAfterTax > 0
+    ? Math.round((monthlyPaymentMin / monthlyIncomeAfterTax) * 100)
+    : 0;
+
+  // 12. Get government loans using pre-tax annual income
   const governmentLoans = getGovernmentLoans(
     recommendedPrice,
-    annualIncomeCouple,
+    totalPreTaxAnnual,
     input.isCouple,
     isFirstTime
   );
 
-  // 11. Get regional feasibility
+  // 13. Get regional feasibility
   const regionalFeasibility = getRegionalFeasibility(
     availableBudget,
     isFirstTime
@@ -331,6 +350,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     maxLoan,
     monthlyPaymentMin,
     monthlyPaymentMax,
+    loanTermYears: input.loanTermYears,
   };
 
   const costBreakdown = {
@@ -347,6 +367,8 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   return {
     monthlyIncomeCouple,
     annualIncomeCouple,
+    totalPreTaxAnnual,
+    monthlyIncomeAfterTax,
     isFirstTimeEligible: isFirstTime,
     totalAssets,
     totalDeductions,
@@ -356,6 +378,8 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     conservativePrice,
     recommendedPrice,
     optimisticPrice,
+    isPaymentHeavy,
+    paymentRatioPercent,
     governmentLoans,
     regionalFeasibility,
     costBreakdown,
