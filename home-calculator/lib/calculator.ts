@@ -3,6 +3,9 @@ import {
   CalculationResult,
   AcquisitionTaxBreakdown,
   LoanInfo,
+  CreditLoanInfo,
+  RegulationInfo,
+  PurchasePowerSummary,
   GovernmentLoanProduct,
   RegionalFeasibility,
 } from './types';
@@ -51,18 +54,105 @@ export function calculateAcquisitionTax(
   };
 }
 
+// Get regulation info by region (2025년 규제 기준)
+function getRegulationInfo(
+  region: 'seoul' | 'gyeonggi' | 'metropolitan' | 'other',
+  isFirstTime: boolean
+): RegulationInfo {
+  const regulations = {
+    seoul: {
+      regionName: '서울 (투기과열지구)',
+      isRegulated: true,
+      mortgageCap: 6000, // 6억원 상한
+      ltvLimit: isFirstTime ? 0.6 : 0.5,
+      stressTestRate: 0.03, // 3.0% 스트레스 테스트
+      details: '가장 제한적 규제. LTV/주담대 상한 적용. 첫-구매자도 60%로 제한.',
+    },
+    gyeonggi: {
+      regionName: '경기 (조정대상지역)',
+      isRegulated: true,
+      mortgageCap: 6000, // 6억원 상한
+      ltvLimit: isFirstTime ? 0.8 : 0.7,
+      stressTestRate: 0.03,
+      details: '조정대상지역. 주담대 6억 상한, 첫-구매자 LTV 80%',
+    },
+    metropolitan: {
+      regionName: '광역시 (조정)',
+      isRegulated: true,
+      mortgageCap: 6000,
+      ltvLimit: isFirstTime ? 0.8 : 0.7,
+      stressTestRate: 0.03,
+      details: '조정대상지역. 서울과 동일한 규제 적용',
+    },
+    other: {
+      regionName: '기타 지역 (비규제)',
+      isRegulated: false,
+      mortgageCap: 999999, // 제한 없음
+      ltvLimit: isFirstTime ? 0.85 : 0.8,
+      stressTestRate: 0.015, // 1.5% 스트레스 테스트
+      details: '규제 없음. 일반적인 금융기준 적용',
+    },
+  };
+  return regulations[region];
+}
+
 // Get LTV by region
 function getLTVByRegion(
   region: 'seoul' | 'gyeonggi' | 'metropolitan' | 'other',
   isFirstTime: boolean
 ): number {
-  const ltv = {
-    seoul: isFirstTime ? 0.6 : 0.5,
-    gyeonggi: isFirstTime ? 0.8 : 0.7,
-    metropolitan: isFirstTime ? 0.8 : 0.7,
-    other: 0.8,
+  const regulation = getRegulationInfo(region, isFirstTime);
+  return regulation.ltvLimit;
+}
+
+// Calculate credit loan (신용대출/생활자금)
+function calculateCreditLoan(
+  annualIncome: number, // 만원 단위 세전 연봉
+  isCouple: boolean,
+  useLifestyleLoan: boolean,
+  creditScore: number,
+  isMultiPropertyOwner: boolean
+): CreditLoanInfo {
+  if (!useLifestyleLoan) {
+    return {
+      maxLoan: 0,
+      monthlyPayment: 0,
+      eligible: false,
+      reason: '신용대출 미선택',
+    };
+  }
+
+  // 다주택자는 신용대출 불가
+  if (isMultiPropertyOwner) {
+    return {
+      maxLoan: 0,
+      monthlyPayment: 0,
+      eligible: false,
+      reason: '다주택자는 신용대출 불가',
+    };
+  }
+
+  // 신용점수에 따른 한도 결정 (간단한 모델)
+  let loanLimit = 5000; // 기본 5000만원
+  if (creditScore >= 800) {
+    loanLimit = 10000; // 신용점수 높으면 1억원
+  } else if (creditScore >= 750) {
+    loanLimit = 8000; // 8000만원
+  } else if (creditScore >= 700) {
+    loanLimit = 6000; // 6000만원
+  }
+
+  // 연봉의 50% 이상은 대출 불가 (과도한 영끌 방지)
+  const maxByIncome = Math.min(annualIncome * 0.5, loanLimit);
+
+  // 월 상환액 (5% 고정금리, 10년 기준)
+  const monthlyPayment = calculateMonthlyPayment(maxByIncome, 0.05, 10);
+
+  return {
+    maxLoan: maxByIncome,
+    monthlyPayment,
+    eligible: true,
   };
-  return ltv[region];
 }
 
 // Calculate monthly payment based on principal and interest
@@ -343,6 +433,29 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     isFirstTime
   );
 
+  // 14. Calculate credit loan (신용대출/영끌)
+  const creditLoanInfo = calculateCreditLoan(
+    totalPreTaxAnnual,
+    input.isCouple,
+    input.useLifestyleLoan,
+    input.creditScore,
+    false // 다주택자 아님 (첫 계산이라 가정)
+  );
+
+  // 15. Calculate final purchase power with credit loan (영끌)
+  const yeongkkulPrice = availableBudget + maxLoan + creditLoanInfo.maxLoan;
+
+  // 16. Get regulation info
+  const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
+
+  // 17. Calculate purchase power summary (한눈에 보기)
+  const purchasePower: PurchasePowerSummary = {
+    cashOnly: availableBudget,
+    withMortgage: availableBudget + maxLoan,
+    withCreditLoan: yeongkkulPrice,
+    recommendedPrice: recommendedPrice,
+  };
+
   const loanInfo: LoanInfo = {
     ltv,
     maxLoanByLTV,
@@ -374,14 +487,18 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     totalDeductions,
     availableBudget,
     loanInfo,
+    creditLoanInfo,
     acquisitionTax,
     conservativePrice,
     recommendedPrice,
     optimisticPrice,
+    yeongkkulPrice,
     isPaymentHeavy,
     paymentRatioPercent,
+    purchasePower,
     governmentLoans,
     regionalFeasibility,
+    regulationInfo,
     costBreakdown,
   };
 }

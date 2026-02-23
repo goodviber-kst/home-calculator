@@ -20,6 +20,10 @@ export interface HomeCalculatorInput {
   // Section 4: Region & Loan
   targetRegion: 'seoul' | 'gyeonggi' | 'metropolitan' | 'other';
   loanTermYears: 10 | 15 | 20 | 30;
+
+  // Section 5: Credit Loan (영끌)
+  useLifestyleLoan: boolean; // 신용대출(생활자금) 사용 여부
+  creditScore: number; // 신용점수 (300-950, 영끌 한도 결정)
 }
 
 // Calculation result types
@@ -41,6 +45,30 @@ export interface LoanInfo {
   monthlyPaymentMax: number; // 최대 월 상환액 (금리 높을 때)
   loanTermYears: number; // 대출 기간 (년)
 }
+
+export interface CreditLoanInfo {
+  maxLoan: number; // 신용대출 최대 한도 (연봉 기준 또는 100만원 상한)
+  monthlyPayment: number; // 월 상환액 (금리 5%)
+  eligible: boolean; // 신용대출 사용 가능 여부 (다주택자 제외)
+  reason?: string; // 부적격 사유
+}
+
+export interface RegulationInfo {
+  regionName: string;
+  isRegulated: boolean; // 조정대상/투기과열/토지거래 규제 지역 여부
+  mortgageCap: number; // 주택담보대출 상한 (조정지역 6억, 기타 무제한)
+  ltvLimit: number; // 조정지역 LTV 제한
+  stressTestRate: number; // 스트레스 테스트 금리 (규제지역 3.0%)
+  details: string; // 지역 규제 설명
+}
+
+export interface PurchasePowerSummary {
+  cashOnly: number; // 현금만으로 구매 가능
+  withMortgage: number; // 주담대 포함
+  withCreditLoan: number; // 신용대출까지 포함 (영끌)
+  recommendedPrice: number; // 권장 구매가 (현금 + 적정 주담대)
+}
+
 
 export interface GovernmentLoanProduct {
   name: string;
@@ -76,6 +104,7 @@ export interface CalculationResult {
 
   // Loan
   loanInfo: LoanInfo;
+  creditLoanInfo: CreditLoanInfo; // 신용대출(생활자금) 정보
 
   // Acquisition Tax
   acquisitionTax: AcquisitionTaxBreakdown;
@@ -84,16 +113,23 @@ export interface CalculationResult {
   conservativePrice: number; // 보수적 (가용 예산 + 적정 대출)
   recommendedPrice: number; // 권장 (가용 예산 + 최대 대출)
   optimisticPrice: number; // 낙관적 (가용 예산 + DSR 최대)
+  yeongkkulPrice: number; // 영끌 (현금 + 주담대 + 신용대출)
 
   // Payment Burden
   isPaymentHeavy: boolean; // 월상환액 > 세후 월소득 30%
   paymentRatioPercent: number; // 상환 비율 (%)
+
+  // Final Purchase Power Summary
+  purchasePower: PurchasePowerSummary;
 
   // Government Loans
   governmentLoans: GovernmentLoanProduct[];
 
   // Regional Feasibility
   regionalFeasibility: RegionalFeasibility[];
+
+  // Regulation Info
+  regulationInfo: RegulationInfo;
 
   // Cost Breakdown
   costBreakdown: {

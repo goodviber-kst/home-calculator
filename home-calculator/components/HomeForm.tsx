@@ -23,6 +23,8 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
     movingCost: 100,
     targetRegion: 'gyeonggi',
     loanTermYears: 30,
+    useLifestyleLoan: false,
+    creditScore: 700, // 기본 신용점수
   });
 
   const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -382,6 +384,63 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               <div className="text-blue-900 font-medium">계산기 기준</div>
               <div className="text-blue-700">3.3% ~ 4.5%</div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 5: Credit Loan (영끌) */}
+      <div className="bg-red-50 rounded-lg border border-red-200 p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <span className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">
+            5
+          </span>
+          신용대출 (영끌 옵션)
+        </h2>
+        <div className="space-y-4">
+          <div className="flex items-center gap-4 p-3 bg-red-100 rounded-lg">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="useLifestyleLoan"
+                checked={input.useLifestyleLoan}
+                onChange={handleChange}
+                className="w-4 h-4 rounded border-gray-300 cursor-pointer"
+              />
+              <span className="text-sm font-medium">신용대출 포함 (영끌)</span>
+            </label>
+            <span className="text-xs text-gray-600">⚠️ 높은 부채 비율</span>
+          </div>
+
+          {input.useLifestyleLoan && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                신용점수 (300-950)
+              </label>
+              <input
+                type="number"
+                name="creditScore"
+                value={input.creditScore}
+                onChange={handleChange}
+                min="300"
+                max="950"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="예: 700"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                점수가 높을수록 신용대출 한도 증가 (800+: 1억, 750-799: 8000만, 700-749: 6000만)
+              </p>
+            </div>
+          )}
+
+          <div className="p-3 bg-white rounded border border-red-200 text-xs text-gray-700">
+            <div className="font-semibold mb-2">📌 신용대출 정보</div>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>한도: 신용점수와 연봉 기준으로 결정</li>
+              <li>금리: 약 5% (변동금리)</li>
+              <li>기간: 10년 고정</li>
+              <li>제한: 다주택자는 불가</li>
+              <li>주의: 과도한 영끌은 금융 위험</li>
+            </ul>
           </div>
         </div>
       </div>

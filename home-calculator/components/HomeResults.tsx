@@ -28,6 +28,48 @@ function formatWon(won: number): string {
 export default function HomeResults({ result }: HomeResultsProps) {
   return (
     <div className="space-y-8">
+      {/* HERO: Final Purchase Power Summary (한눈에 보기) */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-lg p-8 text-white shadow-2xl border-2 border-yellow-500">
+        <h2 className="text-sm font-semibold uppercase tracking-widest mb-6 opacity-90">
+          🎯 최종 구매력 한눈에 보기 (영끌 계산기)
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-3 bg-white bg-opacity-10 rounded-lg border border-white border-opacity-20">
+            <div className="text-xs opacity-75 mb-1">현금만</div>
+            <div className="text-2xl font-bold text-yellow-300">
+              {formatPrice(result.purchasePower.cashOnly)}
+            </div>
+            <div className="text-xs opacity-60 mt-1">가용 예산</div>
+          </div>
+
+          <div className="text-center p-3 bg-white bg-opacity-10 rounded-lg border border-white border-opacity-20">
+            <div className="text-xs opacity-75 mb-1">+ 주담대</div>
+            <div className="text-2xl font-bold text-blue-300">
+              {formatPrice(result.purchasePower.withMortgage)}
+            </div>
+            <div className="text-xs opacity-60 mt-1">권장</div>
+          </div>
+
+          {result.creditLoanInfo.eligible && (
+            <div className="text-center p-3 bg-white bg-opacity-10 rounded-lg border border-red-500 border-opacity-50">
+              <div className="text-xs opacity-75 mb-1">+ 신용대출</div>
+              <div className="text-2xl font-bold text-red-300">
+                {formatPrice(result.purchasePower.withCreditLoan)}
+              </div>
+              <div className="text-xs opacity-60 mt-1">영끌</div>
+            </div>
+          )}
+
+          <div className="text-center p-3 bg-yellow-500 bg-opacity-20 rounded-lg border border-yellow-500">
+            <div className="text-xs opacity-90 mb-1 font-semibold">예상 규모</div>
+            <div className="text-2xl font-bold">
+              {Math.round(result.purchasePower.withMortgage / 10000)}억
+            </div>
+            <div className="text-xs opacity-75 mt-1">현실적 목표</div>
+          </div>
+        </div>
+      </div>
+
       {/* HERO: Purchase Price Range */}
       <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-emerald-900 rounded-lg p-8 text-white shadow-xl">
         <h2 className="text-sm font-semibold uppercase tracking-wide mb-2 opacity-90">
@@ -52,6 +94,70 @@ export default function HomeResults({ result }: HomeResultsProps) {
               {formatPrice(result.optimisticPrice)}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Regulation & Credit Loan Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Region Regulation Info */}
+        <div className="rounded-lg border border-gray-200 p-6 bg-gradient-to-br from-orange-50 to-amber-50">
+          <h3 className="font-semibold text-lg mb-4">📍 {result.regulationInfo.regionName}</h3>
+          <div className="space-y-3 text-sm">
+            <div>
+              <span className="font-medium">규제 여부:</span>
+              <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${result.regulationInfo.isRegulated ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
+                {result.regulationInfo.isRegulated ? '✗ 규제 지역' : '✓ 비규제'}
+              </span>
+            </div>
+            <div>
+              <span className="font-medium">주담대 상한:</span>
+              <span className="ml-2">{result.regulationInfo.isRegulated ? '6억원' : '제한 없음'}</span>
+            </div>
+            <div>
+              <span className="font-medium">LTV 한도:</span>
+              <span className="ml-2">{(result.regulationInfo.ltvLimit * 100).toFixed(0)}%</span>
+            </div>
+            <div>
+              <span className="font-medium">스트레스 테스트:</span>
+              <span className="ml-2">{(result.regulationInfo.stressTestRate * 100).toFixed(1)}%</span>
+            </div>
+            <div className="pt-2 border-t border-amber-300">
+              <p className="text-xs text-gray-700">{result.regulationInfo.details}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Credit Loan Info */}
+        <div className={`rounded-lg border-2 p-6 ${result.creditLoanInfo.eligible ? 'border-red-300 bg-gradient-to-br from-red-50 to-rose-50' : 'border-gray-300 bg-gray-50'}`}>
+          <h3 className="font-semibold text-lg mb-4">💳 신용대출 (영끌)</h3>
+          {result.creditLoanInfo.eligible ? (
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="font-medium">최대 한도:</span>
+                <span className="ml-2 text-lg font-bold text-red-600">{formatPrice(result.creditLoanInfo.maxLoan)}</span>
+              </div>
+              <div>
+                <span className="font-medium">월 상환액:</span>
+                <span className="ml-2">{formatWon(result.creditLoanInfo.monthlyPayment)}</span>
+              </div>
+              <div>
+                <span className="font-medium">금리:</span>
+                <span className="ml-2">약 5% (변동)</span>
+              </div>
+              <div>
+                <span className="font-medium">기간:</span>
+                <span className="ml-2">10년</span>
+              </div>
+              <div className="pt-2 border-t border-red-300 bg-red-100 p-2 rounded text-xs">
+                <span className="font-semibold">⚠️ 주의:</span> 신용대출은 높은 금리와 리스크가 있습니다. 신중하게 사용하세요.
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-600">
+              <p className="font-medium mb-2">❌ 신용대출 불가</p>
+              <p>{result.creditLoanInfo.reason}</p>
+            </div>
+          )}
         </div>
       </div>
 
