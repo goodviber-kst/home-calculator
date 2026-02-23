@@ -130,6 +130,47 @@ export default function HomeResults({ result }: HomeResultsProps) {
         )}
       </div>
 
+      {/* 목표 주택 달성 가능성 분석 */}
+      {result.targetPropertyFeasibility && (
+        <div
+          className={`rounded-lg p-5 border-2 ${
+            result.targetPropertyFeasibility.achievable
+              ? 'bg-green-50 border-green-400'
+              : 'bg-amber-50 border-amber-400'
+          }`}
+        >
+          <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+            {result.targetPropertyFeasibility.achievable ? '✅' : '🎯'}
+            목표 주택 {formatPrice(result.targetPropertyFeasibility.targetPrice)} 분석
+          </h3>
+          {result.targetPropertyFeasibility.achievable ? (
+            <div className="text-green-700 space-y-1">
+              <p className="font-bold text-xl">달성 가능합니다!</p>
+              <p className="text-sm">
+                현재 최대 구매가 {formatPrice(result.targetPropertyFeasibility.maxAffordable)} —
+                목표보다{' '}
+                <span className="font-semibold">
+                  {formatPrice(Math.abs(result.targetPropertyFeasibility.shortfall))} 여유
+                </span>
+              </p>
+            </div>
+          ) : (
+            <div className="text-amber-800 space-y-2">
+              <p className="font-bold text-xl">
+                {formatPrice(result.targetPropertyFeasibility.shortfall)} 부족
+              </p>
+              <p className="text-sm">
+                현재 최대 구매가: {formatPrice(result.targetPropertyFeasibility.maxAffordable)} →
+                목표: {formatPrice(result.targetPropertyFeasibility.targetPrice)}
+              </p>
+              <div className="p-2 bg-amber-100 rounded text-xs text-amber-900">
+                추가 저축이나 소득 증가 시 달성 가능한 목표입니다.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Regulation & Credit Loan Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Region Regulation Info */}
@@ -166,20 +207,26 @@ export default function HomeResults({ result }: HomeResultsProps) {
           {result.creditLoanInfo.eligible ? (
             <div className="space-y-3 text-sm">
               <div>
-                <span className="font-medium">최대 한도:</span>
+                <span className="font-medium">신청자 한도:</span>
                 <span className="ml-2 text-lg font-bold text-red-600">{formatPrice(result.creditLoanInfo.maxLoan)}</span>
               </div>
+              {result.spouseCreditLoanInfo?.eligible && (
+                <div>
+                  <span className="font-medium">배우자 한도:</span>
+                  <span className="ml-2 text-lg font-bold text-orange-600">{formatPrice(result.spouseCreditLoanInfo.maxLoan)}</span>
+                </div>
+              )}
+              {result.spouseCreditLoanInfo?.eligible && (
+                <div className="pt-1 border-t border-red-200">
+                  <span className="font-semibold">합산 한도:</span>
+                  <span className="ml-2 font-bold text-red-700">
+                    {formatPrice(result.creditLoanInfo.maxLoan + result.spouseCreditLoanInfo.maxLoan)}
+                  </span>
+                </div>
+              )}
               <div>
                 <span className="font-medium">월 상환액:</span>
                 <span className="ml-2">{formatWon(result.creditLoanInfo.monthlyPayment)}</span>
-              </div>
-              <div>
-                <span className="font-medium">금리:</span>
-                <span className="ml-2">약 5% (변동)</span>
-              </div>
-              <div>
-                <span className="font-medium">기간:</span>
-                <span className="ml-2">10년</span>
               </div>
               <div className="pt-2 border-t border-red-300 bg-red-100 p-2 rounded text-xs">
                 <span className="font-semibold">⚠️ 주의:</span> 신용대출은 높은 금리와 리스크가 있습니다. 신중하게 사용하세요.
@@ -230,8 +277,9 @@ export default function HomeResults({ result }: HomeResultsProps) {
             {formatWon(result.loanInfo.monthlyPaymentMax)}
           </div>
           <div className="text-sm opacity-90 space-y-1 mt-3">
-            <div>• 금리 3.3% 시: {formatWon(result.loanInfo.monthlyPaymentMin)}</div>
-            <div>• 금리 4.5% 시: {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
+            <div>• 금리 {(result.interestRate - 0.5).toFixed(1)}% 시: {formatWon(result.loanInfo.monthlyPaymentMin)}</div>
+            <div>• 금리 {(result.interestRate + 0.5).toFixed(1)}% 시: {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
+            <div className="opacity-60">· 입력 금리: {result.interestRate.toFixed(1)}%</div>
             <div>• 대출 기간: {result.loanInfo.loanTermYears} 년</div>
             {result.isPaymentHeavy && (
               <div className="mt-2 pt-2 border-t border-white border-opacity-30">

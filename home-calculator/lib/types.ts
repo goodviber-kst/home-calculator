@@ -23,7 +23,13 @@ export interface HomeCalculatorInput {
 
   // Section 5: Credit Loan (영끌)
   useLifestyleLoan: boolean; // 신용대출(생활자금) 사용 여부
-  creditScore: number; // 신용점수 (300-950, 영끌 한도 결정)
+  creditScore: number; // 신용점수 (300-999, 영끌 한도 결정)
+  useSpouseCreditLoan: boolean; // 배우자 신용대출 포함 (공동명의 시)
+  spouseCreditScore: number; // 배우자 신용점수
+
+  // Section 6: Extra
+  interestRate: number; // 예상 주담대 금리 (%, e.g. 4.0)
+  targetPropertyPrice: number; // 목표 주택가격 (만원, 0 = 미입력)
 }
 
 // Calculation result types
@@ -131,6 +137,17 @@ export interface CalculationResult {
 
   // Regulation Info
   regulationInfo: RegulationInfo;
+
+  // Extra
+  interestRate: number; // 계산에 사용된 금리 (%)
+  targetPropertyPrice: number; // 목표 가격 (0 = 미입력)
+  spouseCreditLoanInfo: CreditLoanInfo | null; // 배우자 신용대출 정보
+  targetPropertyFeasibility: {
+    targetPrice: number;
+    achievable: boolean;
+    shortfall: number; // 양수=부족, 음수=여유
+    maxAffordable: number; // 현재 최대 구매가
+  } | null;
 
   // Cost Breakdown
   costBreakdown: {

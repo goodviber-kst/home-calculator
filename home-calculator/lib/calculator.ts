@@ -132,10 +132,12 @@ function calculateCreditLoan(
     };
   }
 
-  // 신용점수에 따른 한도 결정 (간단한 모델)
+  // 신용점수에 따른 한도 결정 (300-999)
   let loanLimit = 5000; // 기본 5000만원
-  if (creditScore >= 800) {
-    loanLimit = 10000; // 신용점수 높으면 1억원
+  if (creditScore >= 900) {
+    loanLimit = 15000; // 1.5억 (최우수)
+  } else if (creditScore >= 800) {
+    loanLimit = 10000; // 1억원
   } else if (creditScore >= 750) {
     loanLimit = 8000; // 8000만원
   } else if (creditScore >= 700) {
@@ -177,14 +179,14 @@ function calculateMonthlyPayment(
 // Calculate max loan based on DSR
 function calculateMaxLoanByDSR(
   annualIncome: number,
-  loanTermYears: number
+  loanTermYears: number,
+  interestRate: number = 0.045 // 소수 형태 (e.g. 0.04 = 4%)
 ): number {
   const dsrRatio = 0.4; // 40% DSR
   const maxAnnualPayment = annualIncome * dsrRatio;
   const maxMonthlyPayment = maxAnnualPayment / 12;
 
-  // Use average interest rate for calculation
-  const avgRate = 0.045; // 4.5% average
+  const avgRate = interestRate;
   const monthlyRate = avgRate / 12;
   const numberOfPayments = loanTermYears * 12;
 
@@ -387,10 +389,12 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
   // 8. Calculate max loans using pre-tax annual income for DSR
   const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
+  const rate = (input.interestRate ?? 4.0) / 100; // 소수 형태
 
   const maxLoanByDSR = calculateMaxLoanByDSR(
     totalPreTaxAnnual,
-    input.loanTermYears
+    input.loanTermYears,
+    rate
   );
   const maxLoanByLTV = (availableBudget * ltv) / (1 - ltv);
 
@@ -402,17 +406,11 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
   const maxLoan = Math.min(maxLoanWithRegulation, maxLoanByDSR);
 
-  // 9. Calculate payment amounts with narrowed interest rate range (3.3% - 4.5%)
-  const monthlyPaymentMin = calculateMonthlyPayment(
-    maxLoan,
-    0.033, // 3.3% (현실적 최저)
-    input.loanTermYears
-  );
-  const monthlyPaymentMax = calculateMonthlyPayment(
-    maxLoan,
-    0.045, // 4.5% (현실적 최고)
-    input.loanTermYears
-  );
+  // 9. Calculate payment amounts based on user-provided interest rate ± 0.5%
+  const rateMin = Math.max(0.01, rate - 0.005);
+  const rateMax = rate + 0.005;
+  const monthlyPaymentMin = calculateMonthlyPayment(maxLoan, rateMin, input.loanTermYears);
+  const monthlyPaymentMax = calculateMonthlyPayment(maxLoan, rateMax, input.loanTermYears);
 
   // 10. Calculate purchase prices
   // maxLoanAtCap: 정책금융 한도 기준 (LTV와 mortgageCap 적용, DSR 무시) — "생애최초 목표"
@@ -454,8 +452,22 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     false // 다주택자 아님 (첫 계산이라 가정)
   );
 
+  // 14-b. 배우자 신용대출 (공동명의 + 배우자 신용대출 옵션 시)
+  const spouseCreditLoanInfo =
+    input.isCouple && input.useSpouseCreditLoan && input.useLifestyleLoan
+      ? calculateCreditLoan(
+          input.spousePreTaxAnnual,
+          false,
+          true,
+          input.spouseCreditScore ?? 700,
+          false
+        )
+      : null;
+
+  const totalCreditLoan = creditLoanInfo.maxLoan + (spouseCreditLoanInfo?.maxLoan ?? 0);
+
   // 15. Calculate final purchase power with credit loan (영끌)
-  const yeongkkulPrice = availableBudget + maxLoan + creditLoanInfo.maxLoan;
+  const yeongkkulPrice = availableBudget + maxLoan + totalCreditLoan;
 
   // 17. Calculate purchase power summary (한눈에 보기)
   const purchasePower: PurchasePowerSummary = {
@@ -487,6 +499,17 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     registrationFee,
   };
 
+  // 목표 주택가 달성 가능성 분석
+  const targetPropertyFeasibility =
+    input.targetPropertyPrice > 0
+      ? {
+          targetPrice: input.targetPropertyPrice,
+          achievable: yeongkkulPrice >= input.targetPropertyPrice,
+          shortfall: input.targetPropertyPrice - yeongkkulPrice,
+          maxAffordable: yeongkkulPrice,
+        }
+      : null;
+
   return {
     monthlyIncomeCouple,
     annualIncomeCouple,
@@ -510,5 +533,9 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     regionalFeasibility,
     regulationInfo,
     costBreakdown,
+    interestRate: input.interestRate ?? 4.0,
+    targetPropertyPrice: input.targetPropertyPrice ?? 0,
+    spouseCreditLoanInfo,
+    targetPropertyFeasibility,
   };
 }
