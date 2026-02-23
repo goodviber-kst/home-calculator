@@ -39,7 +39,8 @@ export default function HomeResults({ result }: HomeResultsProps) {
             <div className="text-2xl font-bold text-yellow-300">
               {formatPrice(result.purchasePower.cashOnly)}
             </div>
-            <div className="text-xs opacity-60 mt-1">가용 예산</div>
+            <div className="text-xs opacity-60 mt-1">대출 없이 가용자금만</div>
+            <div className="text-xs opacity-40 mt-1">= 자산 - 비용</div>
           </div>
 
           <div className="text-center p-3 bg-white bg-opacity-10 rounded-lg border border-white border-opacity-20">
@@ -47,7 +48,10 @@ export default function HomeResults({ result }: HomeResultsProps) {
             <div className="text-2xl font-bold text-blue-300">
               {formatPrice(result.purchasePower.withMortgage)}
             </div>
-            <div className="text-xs opacity-60 mt-1">권장</div>
+            <div className="text-xs opacity-60 mt-1">소득 기준 최대 대출</div>
+            <div className="text-xs opacity-40 mt-1">
+              {formatPrice(result.availableBudget)} + {formatPrice(result.loanInfo.maxLoan)}
+            </div>
           </div>
 
           {result.creditLoanInfo.eligible && (
@@ -56,23 +60,29 @@ export default function HomeResults({ result }: HomeResultsProps) {
               <div className="text-2xl font-bold text-red-300">
                 {formatPrice(result.purchasePower.withCreditLoan)}
               </div>
-              <div className="text-xs opacity-60 mt-1">영끌</div>
+              <div className="text-xs opacity-60 mt-1">신용대출까지 영끌</div>
+              <div className="text-xs opacity-40 mt-1">
+                주담대포함 + {formatPrice(result.creditLoanInfo.maxLoan)}
+              </div>
             </div>
           )}
 
           <div className="text-center p-3 bg-yellow-500 bg-opacity-20 rounded-lg border border-yellow-500">
-            <div className="text-xs opacity-90 mb-1 font-semibold">예상 규모</div>
+            <div className="text-xs opacity-90 mb-1 font-semibold">생애최초 한도</div>
             <div className="text-2xl font-bold">
-              {Math.round(result.purchasePower.withMortgage / 10000)}억
+              {formatPrice(result.availableBudget + result.loanInfo.maxLoanAtCap)}
             </div>
-            <div className="text-xs opacity-75 mt-1">현실적 목표</div>
+            <div className="text-xs opacity-75 mt-1">정책금융 6억 한도 기준</div>
+            <div className="text-xs opacity-50 mt-1">
+              {formatPrice(result.availableBudget)} + {formatPrice(result.loanInfo.maxLoanAtCap)}
+            </div>
           </div>
         </div>
       </div>
 
       {/* HERO: Purchase Price Range */}
       <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-emerald-900 rounded-lg p-8 text-white shadow-xl">
-        <h2 className="text-sm font-semibold uppercase tracking-wide mb-2 opacity-90">
+        <h2 className="text-sm font-semibold uppercase tracking-wide mb-4 opacity-90">
           생애최초 구매 가능 가격대
         </h2>
         <div className="grid grid-cols-3 gap-4">
@@ -81,11 +91,19 @@ export default function HomeResults({ result }: HomeResultsProps) {
             <div className="text-2xl font-bold">
               {formatPrice(result.conservativePrice)}
             </div>
+            <div className="text-xs opacity-60 mt-2">대출 없이 현금만</div>
+            <div className="text-xs opacity-40 mt-1">
+              = 가용자금 {formatPrice(result.availableBudget)}
+            </div>
           </div>
           <div className="text-center border-l border-r border-white border-opacity-30">
             <div className="text-sm opacity-75 mb-1">권장</div>
             <div className="text-2xl font-bold">
               {formatPrice(result.recommendedPrice)}
+            </div>
+            <div className="text-xs opacity-60 mt-2">소득기준 최적 대출</div>
+            <div className="text-xs opacity-40 mt-1">
+              = 가용 {formatPrice(result.availableBudget)} + 주담대 {formatPrice(result.loanInfo.maxLoan)}
             </div>
           </div>
           <div className="text-center">
@@ -93,8 +111,23 @@ export default function HomeResults({ result }: HomeResultsProps) {
             <div className="text-2xl font-bold">
               {formatPrice(result.optimisticPrice)}
             </div>
+            <div className="text-xs opacity-60 mt-2">생애최초 6억 한도 기준</div>
+            <div className="text-xs opacity-40 mt-1">
+              = 가용 {formatPrice(result.availableBudget)} + {formatPrice(result.loanInfo.maxLoanAtCap)}
+            </div>
           </div>
         </div>
+
+        {/* DSR 제약 안내 박스 */}
+        {result.loanInfo.maxLoanByDSR < result.loanInfo.maxLoanAtCap && (
+          <div className="mt-5 p-3 bg-white bg-opacity-10 rounded-lg border border-yellow-400 border-opacity-60 text-sm">
+            <span className="text-yellow-300 font-semibold">💡 소득 제약 안내: </span>
+            <span className="opacity-90">
+              현재 소득 기준 주담대는 최대 {formatPrice(result.loanInfo.maxLoanByDSR)}이에요.
+              낙관적 목표({formatPrice(result.optimisticPrice)})를 달성하려면 연소득이 더 높아야 해요.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Regulation & Credit Loan Info */}

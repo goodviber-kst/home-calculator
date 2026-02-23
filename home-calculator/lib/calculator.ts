@@ -64,9 +64,9 @@ function getRegulationInfo(
       regionName: '서울 (투기과열지구)',
       isRegulated: true,
       mortgageCap: 6000, // 6억원 상한
-      ltvLimit: isFirstTime ? 0.6 : 0.5,
+      ltvLimit: isFirstTime ? 0.8 : 0.5, // 2024년 생애최초 80% 완화
       stressTestRate: 0.03, // 3.0% 스트레스 테스트
-      details: '가장 제한적 규제. LTV/주담대 상한 적용. 첫-구매자도 60%로 제한.',
+      details: '투기과열지구. 생애최초는 LTV 80% (최대 6억), 일반은 50%.',
     },
     gyeonggi: {
       regionName: '경기 (조정대상지역)',
@@ -269,7 +269,7 @@ function getRegionalFeasibility(
     {
       region: '서울 (투기과열)',
       ltvBase: 0.5,
-      ltvFirst: isFirstTime ? 0.6 : 0.5,
+      ltvFirst: isFirstTime ? 0.8 : 0.5,
       maxPriceByLTV: 0,
       feasible: false,
       reason: '',
@@ -386,12 +386,21 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
   // 8. Calculate max loans using pre-tax annual income for DSR
+  const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
+
   const maxLoanByDSR = calculateMaxLoanByDSR(
     totalPreTaxAnnual,
     input.loanTermYears
   );
   const maxLoanByLTV = (availableBudget * ltv) / (1 - ltv);
-  const maxLoan = Math.min(maxLoanByLTV, maxLoanByDSR);
+
+  // 규제 상한 적용 (조정대상지역/투기과열지구: 6억)
+  const maxLoanWithRegulation = Math.min(
+    maxLoanByLTV,
+    regulationInfo.mortgageCap
+  );
+
+  const maxLoan = Math.min(maxLoanWithRegulation, maxLoanByDSR);
 
   // 9. Calculate payment amounts with narrowed interest rate range (3.3% - 4.5%)
   const monthlyPaymentMin = calculateMonthlyPayment(
@@ -406,11 +415,14 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   );
 
   // 10. Calculate purchase prices
-  // 보수적 가격: 대출 포함 (최대대출의 50% 또는 DSR 한도의 25% 중 작은 값)
-  const modestLoan = Math.min(maxLoan * 0.5, maxLoanByDSR * 0.25);
-  const conservativePrice = availableBudget + modestLoan;
+  // maxLoanAtCap: 정책금융 한도 기준 (LTV와 mortgageCap 적용, DSR 무시) — "생애최초 목표"
+  const maxLoanAtCap = maxLoanWithRegulation; // min(maxLoanByLTV, mortgageCap)
+  // 보수적: 대출 없이 현금만
+  const conservativePrice = availableBudget;
+  // 권장: 소득 기준 최대 대출 (LTV + DSR + 규제 상한 모두 적용)
   const recommendedPrice = availableBudget + maxLoan;
-  const optimisticPrice = availableBudget + maxLoanByDSR;
+  // 낙관적: 생애최초 정책한도 기준 (6억 한도, DSR은 목표 소득 기준이므로 제외)
+  const optimisticPrice = availableBudget + maxLoanAtCap;
 
   // 11. Calculate payment burden
   const monthlyIncomeAfterTax = monthlyIncomeCouple;
@@ -445,9 +457,6 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   // 15. Calculate final purchase power with credit loan (영끌)
   const yeongkkulPrice = availableBudget + maxLoan + creditLoanInfo.maxLoan;
 
-  // 16. Get regulation info
-  const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
-
   // 17. Calculate purchase power summary (한눈에 보기)
   const purchasePower: PurchasePowerSummary = {
     cashOnly: availableBudget,
@@ -461,6 +470,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     maxLoanByLTV,
     maxLoanByDSR,
     maxLoan,
+    maxLoanAtCap,
     monthlyPaymentMin,
     monthlyPaymentMax,
     loanTermYears: input.loanTermYears,

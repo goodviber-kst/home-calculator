@@ -40,7 +40,8 @@ export interface LoanInfo {
   ltv: number; // LTV 비율
   maxLoanByLTV: number; // LTV 기준 최대 대출
   maxLoanByDSR: number; // DSR 기준 최대 대출
-  maxLoan: number; // 최종 최대 대출 = min(LTV, DSR)
+  maxLoan: number; // 최종 최대 대출 = min(LTV, DSR, mortgageCap)
+  maxLoanAtCap: number; // 정책금융 한도 기준 최대 대출 = min(LTV, mortgageCap), DSR 무시
   monthlyPaymentMin: number; // 최소 월 상환액 (금리 낮을 때)
   monthlyPaymentMax: number; // 최대 월 상환액 (금리 높을 때)
   loanTermYears: number; // 대출 기간 (년)
