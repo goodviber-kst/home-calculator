@@ -137,7 +137,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
   const [error, setError] = useState('');
 
-  // 일반 필드 (select, checkbox)
+  // 일반 필드 (select, checkbox, range)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, type, value } = e.target;
     setInput((prev) => ({
@@ -145,7 +145,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
       [name]:
         type === 'checkbox'
           ? (e.target as HTMLInputElement).checked
-          : type === 'number'
+          : type === 'number' || type === 'range'
             ? value === ''
               ? 0
               : parseFloat(value) || 0
