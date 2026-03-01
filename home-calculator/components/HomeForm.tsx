@@ -128,9 +128,8 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
     targetRegion: 'seoul',
     loanTermYears: 30,
     useLifestyleLoan: false,
-    creditScore: 700,
+    creditLoanRate: 5.0,
     useSpouseCreditLoan: false,
-    spouseCreditScore: 700,
     interestRate: 4.0,
     targetPropertyPrice: 0,
   });
@@ -398,8 +397,8 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
           {/* 대출 기간 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">대출 기간</label>
-            <div className="grid grid-cols-4 gap-2">
-              {([10, 15, 20, 30] as const).map((y) => (
+            <div className="grid grid-cols-6 gap-2">
+              {([10, 15, 20, 30, 40, 50] as const).map((y) => (
                 <button
                   key={y}
                   type="button"
@@ -476,10 +475,34 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
           {input.useLifestyleLoan && (
             <>
+              {/* 신용대출 금리 */}
+              <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  신용대출 금리{' '}
+                  <span className="font-bold text-red-700">{input.creditLoanRate.toFixed(1)}%</span>
+                </label>
+                <input
+                  type="range"
+                  name="creditLoanRate"
+                  min="3.0"
+                  max="10.0"
+                  step="0.1"
+                  value={input.creditLoanRate}
+                  onChange={handleChange}
+                  className="w-full accent-red-500"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>3.0%</span>
+                  <span>5.0%</span>
+                  <span>7.0%</span>
+                  <span>10.0%</span>
+                </div>
+              </div>
+
               {/* 배우자 신용대출 — 공동명의 시 */}
               {input.isCouple && (
-                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                  <label className="flex items-center gap-2 cursor-pointer mb-3">
+                <div className="p-3 bg-orange-100 rounded-lg border border-orange-300">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       name="useSpouseCreditLoan"
@@ -489,7 +512,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
                     />
                     <span className="text-sm font-medium">배우자 신용대출도 포함</span>
                   </label>
-
+                  <p className="text-xs text-orange-700 mt-2">배우자도 동일한 금리로 신용대출 이용</p>
                 </div>
               )}
             </>

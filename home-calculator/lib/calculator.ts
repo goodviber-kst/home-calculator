@@ -96,7 +96,7 @@ function calculateCreditLoan(
   annualIncome: number, // 만원 단위 세전 연봉
   isCouple: boolean,
   useLifestyleLoan: boolean,
-  creditScore: number,
+  creditLoanRate: number, // 신용대출 금리 (%, e.g. 5.0)
   isMultiPropertyOwner: boolean
 ): CreditLoanInfo {
   if (!useLifestyleLoan) {
@@ -121,8 +121,8 @@ function calculateCreditLoan(
   // 신용대출 한도: 연봉의 100%, 절대 상한 1억(10000만원)
   const maxByIncome = Math.min(annualIncome * 1.0, 10000);
 
-  // 월 상환액 (5% 고정금리, 10년 기준)
-  const monthlyPayment = calculateMonthlyPayment(maxByIncome, 0.05, 10);
+  // 월 상환액 (사용자 입력 금리, 10년 기준)
+  const monthlyPayment = calculateMonthlyPayment(maxByIncome, creditLoanRate / 100, 10);
 
   return {
     maxLoan: maxByIncome,
@@ -599,7 +599,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     totalPreTaxAnnual,
     input.isCouple,
     input.useLifestyleLoan,
-    input.creditScore,
+    input.creditLoanRate,
     false // 다주택자 아님 (첫 계산이라 가정)
   );
 
@@ -610,7 +610,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
           input.spousePreTaxAnnual,
           false,
           true,
-          input.spouseCreditScore ?? 700,
+          input.creditLoanRate,
           false
         )
       : null;

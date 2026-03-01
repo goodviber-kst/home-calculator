@@ -19,13 +19,12 @@ export interface HomeCalculatorInput {
 
   // Section 4: Region & Loan
   targetRegion: 'seoul' | 'gyeonggi' | 'metropolitan' | 'other';
-  loanTermYears: 10 | 15 | 20 | 30;
+  loanTermYears: 10 | 15 | 20 | 30 | 40 | 50;
 
   // Section 5: Credit Loan (영끌)
   useLifestyleLoan: boolean; // 신용대출(생활자금) 사용 여부
-  creditScore: number; // 신용점수 (300-999, 영끌 한도 결정)
+  creditLoanRate: number; // 신용대출 금리 (%, 기본값 5.0)
   useSpouseCreditLoan: boolean; // 배우자 신용대출 포함 (공동명의 시)
-  spouseCreditScore: number; // 배우자 신용점수
 
   // Section 6: Extra
   interestRate: number; // 예상 주담대 금리 (%, e.g. 4.0)
