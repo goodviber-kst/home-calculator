@@ -476,45 +476,6 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
           {input.useLifestyleLoan && (
             <>
-              {/* 신청자 신용점수 */}
-              <div className="p-4 bg-white rounded-lg border border-red-200 space-y-2">
-                <div className="text-sm font-semibold text-gray-700">
-                  {input.isCouple ? '신청자 신용점수' : '신용점수'}
-                </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    name="creditScore"
-                    min="300"
-                    max="999"
-                    step="1"
-                    value={input.creditScore}
-                    onChange={handleChange}
-                    className="flex-1 accent-red-500"
-                  />
-                  <input
-                    type="number"
-                    name="creditScore"
-                    value={input.creditScore}
-                    onChange={handleChange}
-                    min="300"
-                    max="999"
-                    className="w-20 px-2 py-1.5 border border-red-300 rounded text-center text-sm font-bold"
-                  />
-                </div>
-                <p className="text-xs text-gray-500">
-                  {input.creditScore >= 900
-                    ? '최우수 (900+): 최대 1.5억'
-                    : input.creditScore >= 800
-                      ? '우수 (800+): 최대 1억'
-                      : input.creditScore >= 750
-                        ? '양호 (750-799): 최대 8000만'
-                        : input.creditScore >= 700
-                          ? '보통 (700-749): 최대 6000만'
-                          : '기본 (~699): 최대 5000만'}
-                </p>
-              </div>
-
               {/* 배우자 신용대출 — 공동명의 시 */}
               {input.isCouple && (
                 <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">

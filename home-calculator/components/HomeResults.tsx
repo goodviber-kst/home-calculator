@@ -137,18 +137,8 @@ export default function HomeResults({ result }: HomeResultsProps) {
         <h2 className="text-sm font-semibold uppercase tracking-wide mb-4 opacity-90">
           생애최초 구매 가능 가격대
         </h2>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-sm opacity-75 mb-1">보수적</div>
-            <div className="text-2xl font-bold">
-              {formatPrice(result.conservativePrice)}
-            </div>
-            <div className="text-xs opacity-60 mt-2">대출 없이 현금만</div>
-            <div className="text-xs opacity-40 mt-1">
-              = 가용자금 {formatPrice(result.availableBudget)}
-            </div>
-          </div>
-          <div className="text-center border-l border-r border-white border-opacity-30">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center border-r border-white border-opacity-30">
             <div className="text-sm opacity-75 mb-1">권장</div>
             <div className="text-2xl font-bold">
               {formatPrice(result.recommendedPrice)}
@@ -383,34 +373,10 @@ export default function HomeResults({ result }: HomeResultsProps) {
           </div>
         </ResultCard>
 
-        {/* Government Loans */}
-        <ResultCard
-          title="추천 정부 대출 상품"
-          icon="🏦"
-          className="from-emerald-600 to-teal-600"
-        >
-          <div className="space-y-2">
-            {result.governmentLoans.map((loan) => (
-              <div
-                key={loan.name}
-                className={`text-sm p-2 rounded ${
-                  loan.eligible
-                    ? 'bg-white bg-opacity-20'
-                    : 'opacity-50 line-through'
-                }`}
-              >
-                <div className="font-semibold">{loan.name}</div>
-                {loan.eligible && (
-                  <div className="text-xs opacity-90">{loan.interestRate}</div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ResultCard>
       </div>
 
-      {/* Full Width: Government Loan Comparison */}
-      <div className="rounded-lg border border-gray-200 p-6 overflow-x-auto">
+      {/* Removed: Government Loan Comparison */}
+      <div style={{ display: 'none' }}>
         <h3 className="font-semibold text-lg mb-4">정부 대출 상품 전체 비교</h3>
         <table className="w-full text-sm">
           <thead>
@@ -443,34 +409,6 @@ export default function HomeResults({ result }: HomeResultsProps) {
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Regional Feasibility */}
-      <div className="rounded-lg border border-gray-200 p-6">
-        <h3 className="font-semibold text-lg mb-4">지역별 구매 가능성</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {result.regionalFeasibility.map((region) => (
-            <div
-              key={region.region}
-              className={`p-4 rounded-lg border-2 ${
-                region.feasible
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-gray-300 bg-gray-50'
-              }`}
-            >
-              <div className="font-semibold mb-2">{region.region}</div>
-              <div className="text-sm space-y-1">
-                <div>• LTV: {(region.ltvFirst * 100).toFixed(0)}%</div>
-                <div>
-                  • 최대: {formatPrice(region.maxPriceByLTV)}
-                </div>
-                <div className={`font-medium ${region.feasible ? 'text-green-600' : 'text-gray-600'}`}>
-                  {region.reason}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Cost Breakdown */}
@@ -701,17 +639,6 @@ export default function HomeResults({ result }: HomeResultsProps) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Disclaimer */}
-      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 text-xs text-gray-700">
-        <div className="font-semibold mb-2">⚠️ 참고사항</div>
-        <ul className="space-y-1 list-disc list-inside">
-          <li>본 계산기는 참고용이며, 정확한 금액은 금융기관과 상담 후 확인하세요.</li>
-          <li>금리, 대출한도, 세제혜택은 정책 변경에 따라 달라질 수 있습니다.</li>
-          <li>생애최초 감면은 소정의 요건 확인 후 적용됩니다.</li>
-          <li>DSR 및 DTI 규제는 금융기관별로 상이할 수 있습니다.</li>
-        </ul>
       </div>
     </div>
   );
