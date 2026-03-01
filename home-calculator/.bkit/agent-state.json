@@ -2,12 +2,12 @@
   "version": "1.0",
   "enabled": false,
   "teamName": "",
-  "feature": "saju-analysis",
+  "feature": "home-calculator",
   "pdcaPhase": "do",
   "orchestrationPattern": "leader",
   "ctoAgent": "opus",
-  "startedAt": "2026-02-28T13:16:32.905Z",
-  "lastUpdated": "2026-02-28T14:30:22.783Z",
+  "startedAt": "2026-03-01T07:39:15.497Z",
+  "lastUpdated": "2026-03-01T07:44:09.373Z",
   "teammates": [],
   "progress": {
     "totalTasks": 0,
@@ -17,5 +17,5 @@
     "pendingTasks": 0
   },
   "recentMessages": [],
-  "sessionId": "c43162f1-e56b-4da5-a816-79bb951465c9"
+  "sessionId": "f2ac3b55-ee87-4eda-842e-9ce2b7debd11"
 }

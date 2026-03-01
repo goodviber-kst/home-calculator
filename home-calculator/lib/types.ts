@@ -207,4 +207,26 @@ export interface CalculationResult {
 
   // AI 해석용 Summary
   summary: CalculationSummary;
+
+  // Simulations
+  simulations?: SimulationResult[];
+
+  // Real DSR including credit loan
+  realDSRWithCreditLoan?: number; // 신용대출 포함 실제 DSR
+  creditLoanDSRWarning?: string; // DSR 초과 시 경고
+}
+
+// 시뮬레이션 결과 타입
+export interface SimulationResult {
+  type: 'interestRate' | 'income' | 'targetPrice';
+  label: string; // "금리 +1%" 또는 "배우자 소득 +500만원"
+  change: number; // 변화량
+  originalValue: number; // 원본값
+  newValue: number; // 변화된값
+  impact: {
+    monthlyPaymentChange: number; // 월상환액 변화
+    affordablePriceChange: number; // 구매력 변화
+    dsrChange?: number; // DSR 변화
+  };
+  warning?: string; // "DSR 40% 초과" 등
 }

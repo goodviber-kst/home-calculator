@@ -285,6 +285,21 @@ export default function HomeResults({ result }: HomeResultsProps) {
           </div>
         </ResultCard>
 
+        {/* Credit Loan DSR Warning */}
+        {result.creditLoanDSRWarning && (
+          <div className="md:col-span-2 bg-red-50 border-2 border-red-400 rounded-lg p-4">
+            <div className="text-red-900 space-y-2">
+              <div className="font-bold text-lg">⚠️ 신용대출(영끘) 위험 경고</div>
+              <div className="text-sm">
+                <div className="mb-1">{result.creditLoanDSRWarning}</div>
+                <div className="opacity-75 mt-2">
+                  💡 신용대출을 포함한 실제 월상환액이 소득 기준을 초과하면, 신용등급 하락 및 금융 부채 위험이 높습니다.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Acquisition Tax */}
         <ResultCard
           title="취득세"
@@ -440,6 +455,78 @@ export default function HomeResults({ result }: HomeResultsProps) {
           </div>
         </div>
       </div>
+
+      {/* 시뮬레이션: What-If 분석 */}
+      {result.simulations && result.simulations.length > 0 && (
+        <div className="rounded-lg border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-cyan-50 p-6">
+          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+            📈 What-If 시뮬레이션 분석
+          </h3>
+
+          {/* 금리 시나리오 */}
+          {result.simulations.filter((s) => s.type === 'interestRate').length > 0 && (
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-blue-700 mb-3">💹 금리 변동 시나리오</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {result.simulations
+                  .filter((s) => s.type === 'interestRate')
+                  .map((sim, idx) => (
+                    <div key={idx} className="p-3 bg-white rounded-lg border border-blue-200 text-sm">
+                      <div className="font-semibold text-blue-800 mb-2">{sim.label}</div>
+                      <div className="space-y-1 text-xs text-gray-700">
+                        <div>
+                          월상환액: <span className="font-semibold">{formatWon(Math.max(0, sim.impact.monthlyPaymentChange))}</span>
+                          {sim.impact.monthlyPaymentChange > 0 ? '↑' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* 소득 변동 시나리오 */}
+          {result.simulations.filter((s) => s.type === 'income').length > 0 && (
+            <div className="mb-6">
+              <div className="text-sm font-semibold text-green-700 mb-3">💼 소득 증가 시나리오</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {result.simulations
+                  .filter((s) => s.type === 'income')
+                  .map((sim, idx) => (
+                    <div key={idx} className="p-3 bg-white rounded-lg border border-green-200 text-sm">
+                      <div className="font-semibold text-green-800 mb-2">{sim.label}</div>
+                      <div className="space-y-1 text-xs text-gray-700">
+                        <div>
+                          구매력: <span className="font-semibold">{formatPrice(sim.impact.affordablePriceChange)}</span> 증가↑
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* 목표가 시나리오 */}
+          {result.simulations.filter((s) => s.type === 'targetPrice').length > 0 && (
+            <div>
+              <div className="text-sm font-semibold text-orange-700 mb-3">🎯 목표가 변동 시나리오</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {result.simulations
+                  .filter((s) => s.type === 'targetPrice')
+                  .map((sim, idx) => (
+                    <div key={idx} className="p-3 bg-white rounded-lg border border-orange-200 text-sm">
+                      <div className="font-semibold text-orange-800 mb-2">{sim.label}</div>
+                      <div className="space-y-1 text-xs text-gray-700">
+                        {sim.warning && <div className="text-red-600 font-semibold">{sim.warning}</div>}
+                        {!sim.warning && <div className="text-green-600">✓ 달성 가능</div>}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* AI 해석용 Summary (로직 검증/수정 용도) */}
       <div className="rounded-lg border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-50 p-6">

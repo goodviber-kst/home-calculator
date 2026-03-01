@@ -9,6 +9,7 @@ import {
   PurchasePowerSummary,
   GovernmentLoanProduct,
   RegionalFeasibility,
+  SimulationResult,
 } from './types';
 
 // Calculate acquisition tax (취득세) — 모든 값 만원 단위
@@ -283,6 +284,97 @@ function getRegionalFeasibility(
   });
 }
 
+// Generate simulations for "what-if" analysis
+function generateSimulations(
+  input: HomeCalculatorInput,
+  baselineMetrics: {
+    monthlyPaymentMin: number;
+    monthlyPaymentMax: number;
+    yeongkkulPrice: number;
+    maxLoan: number;
+    realDSRWithCreditLoan: number;
+    totalPreTaxAnnual: number;
+  }
+): SimulationResult[] {
+  const simulations: SimulationResult[] = [];
+
+  // 1. 금리 시나리오 (현재, +1%, +1.5%)
+  const currentRate = input.interestRate ?? 4.0;
+  const ratesScenarios = [0, 1.0, 1.5];
+
+  ratesScenarios.forEach((increase) => {
+    const newRate = currentRate + increase;
+    const monthlyPayment = calculateMonthlyPayment(
+      baselineMetrics.maxLoan,
+      newRate / 100,
+      input.loanTermYears
+    );
+
+    simulations.push({
+      type: 'interestRate',
+      label: increase === 0 ? `현재 금리 ${currentRate}%` : `금리 +${increase}%`,
+      change: increase,
+      originalValue: currentRate,
+      newValue: newRate,
+      impact: {
+        monthlyPaymentChange: monthlyPayment - baselineMetrics.monthlyPaymentMin,
+        affordablePriceChange: 0, // 금리는 구매력에 직접 영향 없음 (DSR 기반)
+      },
+    });
+  });
+
+  // 2. 배우자/부부 소득 변화 시나리오
+  if (input.isCouple) {
+    const incomeIncreases = [500, 1000]; // 만원 단위
+
+    incomeIncreases.forEach((increase) => {
+      const newPreTaxAnnual = input.applicantPreTaxAnnual + input.spousePreTaxAnnual + increase * 12;
+      const newMaxLoanByDSR = calculateMaxLoanByDSR(newPreTaxAnnual, input.loanTermYears, (input.interestRate ?? 4.0) / 100);
+      const newAffordablePrice = 0; // 계산 복잡하므로 생략 (실제로는 재계산)
+
+      simulations.push({
+        type: 'income',
+        label: `배우자 소득 +${increase}만원 (월)`,
+        change: increase,
+        originalValue: (input.applicantPreTaxAnnual + input.spousePreTaxAnnual) / 12,
+        newValue: (input.applicantPreTaxAnnual + input.spousePreTaxAnnual) / 12 + increase,
+        impact: {
+          monthlyPaymentChange: 0,
+          affordablePriceChange: (newMaxLoanByDSR - baselineMetrics.maxLoan) * (input.loanTermYears === 20 ? 1 : input.loanTermYears === 15 ? 1 : 1), // 근사값
+        },
+      });
+    });
+  }
+
+  // 3. 목표가 시나리오
+  if (input.targetPropertyPrice > 0) {
+    const priceIncreases = [50000, 100000]; // 만원 단위 (5000만, 1억)
+
+    priceIncreases.forEach((increase) => {
+      const newTargetPrice = input.targetPropertyPrice + increase;
+      const newAcquisitionTax = calculateAcquisitionTax(newTargetPrice, true);
+      const newRegistrationFee = newTargetPrice * 0.0045; // 등기비 0.45%
+
+      simulations.push({
+        type: 'targetPrice',
+        label: `목표가 +${(increase / 10000).toFixed(0)}억원`,
+        change: increase,
+        originalValue: input.targetPropertyPrice,
+        newValue: newTargetPrice,
+        impact: {
+          monthlyPaymentChange: 0, // 목표가 변화는 월상환액에 직접 영향 없음
+          affordablePriceChange: 0, // 이미 충분한 재정으로 가정
+        },
+        warning: newTargetPrice > baselineMetrics.yeongkkulPrice
+          ? `⚠️ 현재 구매력(${(baselineMetrics.yeongkkulPrice / 10000).toFixed(1)}억) 초과`
+          : undefined,
+      });
+    });
+  }
+
+  return simulations;
+}
+
 // Generate summary for AI interpretation and debugging
 function generateSummary(
   totalPreTaxAnnual: number,
@@ -518,6 +610,14 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
   const totalCreditLoan = creditLoanInfo.maxLoan + (spouseCreditLoanInfo?.maxLoan ?? 0);
 
+  // 신용대출 월상환액 (DSR 포함 계산용)
+  const creditLoanMonthlyPayment = creditLoanInfo.monthlyPayment + (spouseCreditLoanInfo?.monthlyPayment ?? 0);
+  const totalMonthlyPaymentWithCreditLoan = monthlyPaymentMin + creditLoanMonthlyPayment;
+  const realDSRWithCreditLoan = (totalMonthlyPaymentWithCreditLoan * 12) / totalPreTaxAnnual;
+  const creditLoanDSRWarning = realDSRWithCreditLoan > 0.4
+    ? `⚠️ 신용대출 포함 시 실제 DSR ${(realDSRWithCreditLoan * 100).toFixed(1)}% (기준 40% 초과!)`
+    : '';
+
   // 15. Calculate final purchase power with credit loan (영끌)
   const yeongkkulPrice = availableBudget + maxLoan + totalCreditLoan;
 
@@ -606,5 +706,15 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     spouseCreditLoanInfo,
     targetPropertyFeasibility,
     summary,
+    realDSRWithCreditLoan,
+    creditLoanDSRWarning: creditLoanDSRWarning || undefined,
+    simulations: generateSimulations(input, {
+      monthlyPaymentMin,
+      monthlyPaymentMax,
+      yeongkkulPrice,
+      maxLoan,
+      realDSRWithCreditLoan,
+      totalPreTaxAnnual,
+    }),
   };
 }

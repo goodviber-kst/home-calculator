@@ -1,0 +1,281 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-01T07:51:10.504Z",
+  "activeFeatures": [
+    "home-calculator"
+  ],
+  "primaryFeature": "home-calculator",
+  "features": {
+    "home-calculator": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-01T01:06:32.198Z",
+        "lastUpdated": "2026-03-01T07:51:10.504Z"
+      },
+      "lastFile": "/Users/user/study/home-calculator/components/HomeResults.tsx"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-02-28T13:55:42.311Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-01T07:51:10.504Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-01T01:06:32.198Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:08:34.935Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:09:01.805Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:09:24.076Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:09:32.769Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:10:17.053Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:29:28.722Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:29:37.734Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:29:41.199Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:29:46.672Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T01:40:25.170Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T02:44:43.123Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T02:55:27.018Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:01:17.130Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:11:13.560Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:19:47.803Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:25:01.662Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:25:18.750Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:25:27.633Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:25:37.217Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T03:25:50.981Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T06:43:40.678Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T06:44:07.608Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T06:44:24.272Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T06:54:25.663Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T06:55:25.625Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:04:38.662Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:04:43.948Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:05:02.204Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:14:31.383Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:14:36.514Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:14:41.268Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:33:14.601Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:33:38.265Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:47:32.172Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:47:50.102Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:48:48.870Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:49:14.579Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:49:31.606Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:50:40.153Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-01T07:51:10.504Z",
+      "feature": "home-calculator",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}
