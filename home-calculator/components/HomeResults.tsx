@@ -123,7 +123,7 @@ export default function HomeResults({ result }: HomeResultsProps) {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-sm opacity-75 mb-1 font-semibold">영끘</div>
+            <div className="text-sm opacity-75 mb-1 font-semibold">영끌</div>
             <div className="text-2xl font-bold text-red-400">
               {formatPrice(result.yeongkkulPrice)}
             </div>
@@ -269,7 +269,7 @@ export default function HomeResults({ result }: HomeResultsProps) {
         {result.creditLoanDSRWarning && (
           <div className="md:col-span-2 bg-red-50 border-2 border-red-400 rounded-lg p-4">
             <div className="text-red-900 space-y-2">
-              <div className="font-bold text-lg">⚠️ 신용대출(영끘) 위험 경고</div>
+              <div className="font-bold text-lg">⚠️ 신용대출(영끌) 위험 경고</div>
               <div className="text-sm">
                 <div className="mb-1">{result.creditLoanDSRWarning}</div>
                 <div className="opacity-75 mt-2">
@@ -463,49 +463,7 @@ export default function HomeResults({ result }: HomeResultsProps) {
                   ))}
               </div>
             </div>
-          )}
-
-          {/* 소득 변동 시나리오 */}
-          {result.simulations.filter((s) => s.type === 'income').length > 0 && (
-            <div className="mb-6">
-              <div className="text-sm font-semibold text-green-700 mb-3">💼 소득 증가 시나리오</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {result.simulations
-                  .filter((s) => s.type === 'income')
-                  .map((sim, idx) => (
-                    <div key={idx} className="p-3 bg-white rounded-lg border border-green-200 text-sm">
-                      <div className="font-semibold text-green-800 mb-2">{sim.label}</div>
-                      <div className="space-y-1 text-xs text-gray-700">
-                        <div>
-                          구매력: <span className="font-semibold">{formatPrice(sim.impact.affordablePriceChange)}</span> 증가↑
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* 목표가 시나리오 */}
-          {result.simulations.filter((s) => s.type === 'targetPrice').length > 0 && (
-            <div>
-              <div className="text-sm font-semibold text-orange-700 mb-3">🎯 목표가 변동 시나리오</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {result.simulations
-                  .filter((s) => s.type === 'targetPrice')
-                  .map((sim, idx) => (
-                    <div key={idx} className="p-3 bg-white rounded-lg border border-orange-200 text-sm">
-                      <div className="font-semibold text-orange-800 mb-2">{sim.label}</div>
-                      <div className="space-y-1 text-xs text-gray-700">
-                        {sim.warning && <div className="text-red-600 font-semibold">{sim.warning}</div>}
-                        {!sim.warning && <div className="text-green-600">✓ 달성 가능</div>}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
+          )}        </div>
       )}
     </div>
   );

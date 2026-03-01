@@ -302,6 +302,13 @@ function generateSimulations(
   const currentRate = input.interestRate ?? 4.0;
   const ratesScenarios = [0, 0.1, 0.2, 0.3, 0.5, 1.0];
 
+  // 기준: 현재 입력 금리 기준의 월상환액
+  const baseMonthlyPayment = calculateMonthlyPayment(
+    baselineMetrics.maxLoan,
+    currentRate / 100,
+    input.loanTermYears
+  );
+
   ratesScenarios.forEach((increase) => {
     const newRate = currentRate + increase;
     const monthlyPayment = calculateMonthlyPayment(
@@ -317,7 +324,7 @@ function generateSimulations(
       originalValue: currentRate,
       newValue: newRate,
       impact: {
-        monthlyPaymentChange: monthlyPayment - baselineMetrics.monthlyPaymentMin,
+        monthlyPaymentChange: monthlyPayment - baseMonthlyPayment,
         affordablePriceChange: 0, // 금리는 구매력에 직접 영향 없음 (DSR 기반)
       },
     });
