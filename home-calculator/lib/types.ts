@@ -96,6 +96,49 @@ export interface RegionalFeasibility {
   reason: string;
 }
 
+// AI 해석용 Summary (로직 검증/수정 용도)
+export interface CalculationSummary {
+  // 소득 기반 한도
+  dsr: {
+    annualIncome: number; // 세전 연봉 (만원)
+    dsrRatio: number; // 40%
+    maxAnnualPayment: number; // 연 최대 상환액
+    maxMonthlyPayment: number; // 월 최대 상환액
+    resultMaxLoan: number; // 계산된 최대 대출 (만원)
+  };
+
+  // 자산 기반 한도
+  ltv: {
+    availableBudget: number; // 가용 예산 (만원)
+    ltvRatio: number; // 지역별 LTV
+    resultMaxLoan: number; // 계산된 최대 대출 (만원)
+  };
+
+  // 규제
+  regulation: {
+    regionName: string;
+    mortgageCap: number; // 상한 (만원)
+    isRegulated: boolean;
+  };
+
+  // 최종 결정
+  decision: {
+    maxLoanByDSR: number; // (만원)
+    maxLoanByLTV: number; // (만원)
+    mortgageCap: number; // (만원)
+    maxLoan: number; // 최종 결정 (만원)
+    reason: string; // "DSR 제약", "LTV 제약", "규제상한 제약" 등
+  };
+
+  // 목표가 분석
+  targetAnalysis?: {
+    targetPrice: number;
+    totalAvailable: number; // 현금 + 주담대 + 신용대출
+    shortfall: number;
+    analysis: string;
+  };
+}
+
 export interface CalculationResult {
   // Input summary
   monthlyIncomeCouple: number; // 부부합산 월소득 (세후)
@@ -160,4 +203,7 @@ export interface CalculationResult {
     acquisitionTax: number;
     registrationFee: number;
   };
+
+  // AI 해석용 Summary
+  summary: CalculationSummary;
 }

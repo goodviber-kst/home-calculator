@@ -513,6 +513,131 @@ export default function HomeResults({ result }: HomeResultsProps) {
         </div>
       </div>
 
+      {/* AI 해석용 Summary (로직 검증/수정 용도) */}
+      <div className="rounded-lg border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
+        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          🤖 AI 해석용 Summary (로직 검증/수정)
+        </h3>
+
+        {/* DSR 제약 분석 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="p-4 bg-white rounded-lg border border-blue-300">
+            <div className="text-sm font-semibold text-blue-700 mb-3">📊 DSR 기반 한도</div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>세전 연봉:</span>
+                <span className="font-semibold">{formatWon(result.summary.dsr.annualIncome)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>DSR 비율:</span>
+                <span className="font-semibold">{(result.summary.dsr.dsrRatio * 100).toFixed(0)}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>월 최대 상환:</span>
+                <span className="font-semibold">{formatWon(result.summary.dsr.maxMonthlyPayment)}</span>
+              </div>
+              <div className="pt-2 border-t border-blue-200">
+                <div className="flex justify-between font-bold text-blue-700">
+                  <span>결과 최대 대출:</span>
+                  <span>{formatPrice(result.summary.dsr.resultMaxLoan)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white rounded-lg border border-green-300">
+            <div className="text-sm font-semibold text-green-700 mb-3">🏠 LTV 기반 한도</div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>가용 자금:</span>
+                <span className="font-semibold">{formatPrice(result.summary.ltv.availableBudget)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>LTV 비율:</span>
+                <span className="font-semibold">{(result.summary.ltv.ltvRatio * 100).toFixed(0)}%</span>
+              </div>
+              <div className="text-xs text-gray-600">
+                공식: 가용자금 × LTV / (1 - LTV)
+              </div>
+              <div className="pt-2 border-t border-green-200">
+                <div className="flex justify-between font-bold text-green-700">
+                  <span>결과 최대 대출:</span>
+                  <span>{formatPrice(result.summary.ltv.resultMaxLoan)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 최종 결정 분석 */}
+        <div className="p-4 bg-white rounded-lg border-2 border-purple-400">
+          <div className="text-sm font-semibold text-purple-700 mb-3">⚖️ 최종 제약 분석</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-4">
+            <div className="text-center p-2 bg-purple-50 rounded">
+              <div className="text-xs text-gray-600">DSR</div>
+              <div className="font-bold text-purple-700">{formatPrice(result.summary.decision.maxLoanByDSR)}</div>
+            </div>
+            <div className="text-center p-2 bg-purple-50 rounded">
+              <div className="text-xs text-gray-600">LTV</div>
+              <div className="font-bold text-purple-700">{formatPrice(result.summary.decision.maxLoanByLTV)}</div>
+            </div>
+            <div className="text-center p-2 bg-purple-50 rounded">
+              <div className="text-xs text-gray-600">규제 상한</div>
+              <div className="font-bold text-purple-700">{formatPrice(result.summary.decision.mortgageCap)}</div>
+            </div>
+            <div className="text-center p-2 bg-yellow-100 rounded border border-yellow-400">
+              <div className="text-xs font-semibold text-yellow-800">최종</div>
+              <div className="font-bold text-yellow-800">{formatPrice(result.summary.decision.maxLoan)}</div>
+            </div>
+          </div>
+          <div className="p-3 bg-amber-50 rounded border border-amber-400">
+            <div className="text-sm">
+              <span className="font-semibold text-amber-800">🔍 제약 원인: </span>
+              <span className="text-amber-900">{result.summary.decision.reason}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 규제 정보 */}
+        <div className="mt-6 p-4 bg-white rounded-lg border border-orange-300">
+          <div className="text-sm font-semibold text-orange-700 mb-2">📍 규제 지역 정보</div>
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between">
+              <span>지역:</span>
+              <span className="font-semibold">{result.summary.regulation.regionName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>규제 여부:</span>
+              <span className="font-semibold">{result.summary.regulation.isRegulated ? '✗ 규제' : '✓ 비규제'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>주담대 상한:</span>
+              <span className="font-semibold">{formatPrice(result.summary.regulation.mortgageCap)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 목표가 분석 */}
+        {result.summary.targetAnalysis && (
+          <div className="mt-6 p-4 bg-white rounded-lg border border-indigo-300">
+            <div className="text-sm font-semibold text-indigo-700 mb-2">🎯 목표가 달성 분석</div>
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span>목표 주택가:</span>
+                <span className="font-semibold">{formatPrice(result.summary.targetAnalysis.targetPrice)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>최대 구매 가능:</span>
+                <span className="font-semibold">{formatPrice(result.summary.targetAnalysis.totalAvailable)}</span>
+              </div>
+              <div className="pt-2 border-t border-indigo-200">
+                <div className="font-semibold text-indigo-700">{result.summary.targetAnalysis.analysis}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Disclaimer */}
       <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 text-xs text-gray-700">
         <div className="font-semibold mb-2">⚠️ 참고사항</div>

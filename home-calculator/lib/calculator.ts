@@ -1,6 +1,7 @@
 import {
   HomeCalculatorInput,
   CalculationResult,
+  CalculationSummary,
   AcquisitionTaxBreakdown,
   LoanInfo,
   CreditLoanInfo,
@@ -313,6 +314,82 @@ function getRegionalFeasibility(
   });
 }
 
+// Generate summary for AI interpretation and debugging
+function generateSummary(
+  totalPreTaxAnnual: number,
+  availableBudget: number,
+  ltv: number,
+  loanTermYears: number,
+  interestRate: number,
+  maxLoanByDSR: number,
+  maxLoanByLTV: number,
+  regulationInfo: RegulationInfo,
+  maxLoan: number,
+  yeongkkulPrice: number,
+  targetPropertyPrice: number
+): CalculationSummary {
+  // DSR 계산 과정
+  const dsrRatio = 0.4;
+  const maxAnnualPayment = totalPreTaxAnnual * dsrRatio;
+  const maxMonthlyPayment = maxAnnualPayment / 12;
+
+  // LTV 계산 과정
+  const rate = interestRate / 100;
+
+  // 최종 제약 분석
+  let reason = '';
+  if (maxLoan === Math.min(maxLoanByDSR, maxLoanByLTV, regulationInfo.mortgageCap)) {
+    if (maxLoanByDSR <= maxLoanByLTV && maxLoanByDSR <= regulationInfo.mortgageCap) {
+      reason = `DSR 제약 (월상환 ${Math.round(maxMonthlyPayment / 10000)}만원 한도)`;
+    } else if (maxLoanByLTV <= maxLoanByDSR && maxLoanByLTV <= regulationInfo.mortgageCap) {
+      reason = `LTV 제약 (${Math.round(ltv * 100)}% 한도)`;
+    } else {
+      reason = `규제상한 제약 (${regulationInfo.regionName} ${regulationInfo.mortgageCap / 10000}억원)`;
+    }
+  }
+
+  const targetAnalysis =
+    targetPropertyPrice > 0
+      ? {
+          targetPrice: targetPropertyPrice,
+          totalAvailable: yeongkkulPrice,
+          shortfall: targetPropertyPrice - yeongkkulPrice,
+          analysis:
+            targetPropertyPrice <= yeongkkulPrice
+              ? `✓ 달성 가능 (여유금: ${Math.round((yeongkkulPrice - targetPropertyPrice) / 10000)}억원)`
+              : `✗ 부족 (필요금: ${Math.round((targetPropertyPrice - yeongkkulPrice) / 10000)}억원)`,
+        }
+      : undefined;
+
+  return {
+    dsr: {
+      annualIncome: totalPreTaxAnnual,
+      dsrRatio,
+      maxAnnualPayment,
+      maxMonthlyPayment,
+      resultMaxLoan: maxLoanByDSR,
+    },
+    ltv: {
+      availableBudget,
+      ltvRatio: ltv,
+      resultMaxLoan: maxLoanByLTV,
+    },
+    regulation: {
+      regionName: regulationInfo.regionName,
+      mortgageCap: regulationInfo.mortgageCap,
+      isRegulated: regulationInfo.isRegulated,
+    },
+    decision: {
+      maxLoanByDSR,
+      maxLoanByLTV,
+      mortgageCap: regulationInfo.mortgageCap,
+      maxLoan,
+      reason,
+    },
+    targetAnalysis,
+  };
+}
+
 // Main calculation function
 export function calculate(input: HomeCalculatorInput): CalculationResult {
   // 1. Calculate monthly and annual income (세후)
@@ -510,6 +587,21 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
         }
       : null;
 
+  // Generate summary for AI interpretation
+  const summary = generateSummary(
+    totalPreTaxAnnual,
+    availableBudget,
+    ltv,
+    input.loanTermYears,
+    input.interestRate ?? 4.0,
+    maxLoanByDSR,
+    maxLoanByLTV,
+    regulationInfo,
+    maxLoan,
+    yeongkkulPrice,
+    input.targetPropertyPrice ?? 0
+  );
+
   return {
     monthlyIncomeCouple,
     annualIncomeCouple,
@@ -537,5 +629,6 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     targetPropertyPrice: input.targetPropertyPrice ?? 0,
     spouseCreditLoanInfo,
     targetPropertyFeasibility,
+    summary,
   };
 }
