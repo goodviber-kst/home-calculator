@@ -232,37 +232,59 @@ export default function HomeResults({ result }: HomeResultsProps) {
           icon="📊"
           className="from-purple-600 to-pink-600"
         >
-          <div className="text-3xl font-bold">
-            {formatWon(result.loanInfo.monthlyPaymentMin)} ~{' '}
-            {formatWon(result.loanInfo.monthlyPaymentMax)}
-          </div>
-          <div className="text-sm opacity-90 space-y-1 mt-3">
-            <div>• 금리 {(result.interestRate - 0.5).toFixed(1)}% 시: {formatWon(result.loanInfo.monthlyPaymentMin)}</div>
-            <div>• 금리 {(result.interestRate + 0.5).toFixed(1)}% 시: {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
-            <div className="opacity-60">· 입력 금리: {result.interestRate.toFixed(1)}%</div>
-            <div>• 대출 기간: {result.loanInfo.loanTermYears} 년</div>
-            {result.isPaymentHeavy && (
-              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
-                <div className="text-red-100 font-semibold">
-                  🔴 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 다소 무리일 수 있어요
+          {/* 신용대출 월상환액 계산 */}
+          {(() => {
+            const creditLoanPayment = result.creditLoanInfo.eligible ? result.creditLoanInfo.monthlyPayment : 0;
+            const spouseCreditLoanPayment = result.spouseCreditLoanInfo?.eligible ? result.spouseCreditLoanInfo.monthlyPayment : 0;
+            const totalCreditLoan = creditLoanPayment + spouseCreditLoanPayment;
+            const totalMin = result.loanInfo.monthlyPaymentMin + totalCreditLoan;
+            const totalMax = result.loanInfo.monthlyPaymentMax + totalCreditLoan;
+
+            return (
+              <>
+                <div className="text-3xl font-bold">
+                  {formatWon(totalMin)} ~ {formatWon(totalMax)}
                 </div>
-              </div>
-            )}
-            {!result.isPaymentHeavy && result.paymentRatioPercent >= 20 && (
-              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
-                <div className="text-yellow-100 font-semibold">
-                  🟡 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 적정 수준
+                <div className="text-sm opacity-90 space-y-1 mt-3">
+                  <div>• 금리 {(result.interestRate - 0.5).toFixed(1)}% 시: {formatWon(totalMin)}</div>
+                  <div>• 금리 {(result.interestRate + 0.5).toFixed(1)}% 시: {formatWon(totalMax)}</div>
+
+                  {/* 상세 분석 */}
+                  <div className="pt-2 mt-2 border-t border-white border-opacity-30 text-xs opacity-75">
+                    <div>주담대: {formatWon(result.loanInfo.monthlyPaymentMin)} ~ {formatWon(result.loanInfo.monthlyPaymentMax)}</div>
+                    {totalCreditLoan > 0 && (
+                      <div>신용대출: {formatWon(totalCreditLoan)} (고정)</div>
+                    )}
+                  </div>
+
+                  <div className="opacity-60">· 입력 금리: {result.interestRate.toFixed(1)}%</div>
+                  <div>• 대출 기간: {result.loanInfo.loanTermYears} 년</div>
+
+                  {result.isPaymentHeavy && (
+                    <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                      <div className="text-red-100 font-semibold">
+                        🔴 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 다소 무리일 수 있어요
+                      </div>
+                    </div>
+                  )}
+                  {!result.isPaymentHeavy && result.paymentRatioPercent >= 20 && (
+                    <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                      <div className="text-yellow-100 font-semibold">
+                        🟡 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 적정 수준
+                      </div>
+                    </div>
+                  )}
+                  {result.paymentRatioPercent < 20 && (
+                    <div className="mt-2 pt-2 border-t border-white border-opacity-30">
+                      <div className="text-green-100 font-semibold">
+                        🟢 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 여유 있는 수준
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-            {result.paymentRatioPercent < 20 && (
-              <div className="mt-2 pt-2 border-t border-white border-opacity-30">
-                <div className="text-green-100 font-semibold">
-                  🟢 월 상환액이 세후 월급의 {result.paymentRatioPercent}% — 여유 있는 수준
-                </div>
-              </div>
-            )}
-          </div>
+              </>
+            );
+          })()}
         </ResultCard>
 
         {/* Credit Loan DSR Warning */}
