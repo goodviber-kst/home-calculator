@@ -553,6 +553,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
           achievable: yeongkkulPrice >= input.targetPropertyPrice,
           shortfall: input.targetPropertyPrice - yeongkkulPrice,
           maxAffordable: yeongkkulPrice,
+          targetAcquisitionTax: calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime),
         }
       : null;
 

@@ -204,6 +204,20 @@ export default function HomeResults({ result }: HomeResultsProps) {
               </div>
             </div>
           )}
+
+          {result.targetPropertyFeasibility.targetAcquisitionTax && (
+            <div className="mt-4 pt-4 border-t border-current border-opacity-20 text-sm space-y-1">
+              <div className="font-semibold">📋 목표가 취득세 분석</div>
+              <div>• 기본 취득세 (3%): {formatWon(result.targetPropertyFeasibility.targetAcquisitionTax.baseTax)}</div>
+              {result.targetPropertyFeasibility.targetAcquisitionTax.exemption > 0 && (
+                <div className="text-xs">
+                  - 생애최초 감면: {formatWon(result.targetPropertyFeasibility.targetAcquisitionTax.exemption)}
+                </div>
+              )}
+              <div>• 지방교육세: {formatWon(result.targetPropertyFeasibility.targetAcquisitionTax.educationTax)}</div>
+              <div className="font-semibold">= 최종 취득세: {formatWon(result.targetPropertyFeasibility.targetAcquisitionTax.finalTax)}</div>
+            </div>
+          )}
         </div>
       )}
 

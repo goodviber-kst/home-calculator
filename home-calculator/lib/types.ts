@@ -190,6 +190,7 @@ export interface CalculationResult {
     achievable: boolean;
     shortfall: number; // 양수=부족, 음수=여유
     maxAffordable: number; // 현재 최대 구매가
+    targetAcquisitionTax?: AcquisitionTaxBreakdown; // 목표 가격에 대한 취득세
   } | null;
 
   // Cost Breakdown
