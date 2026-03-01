@@ -121,8 +121,8 @@ function calculateCreditLoan(
   // 신용대출 한도: 연봉의 100%, 절대 상한 1억(10000만원)
   const maxByIncome = Math.min(annualIncome * 1.0, 10000);
 
-  // 월 상환액 (사용자 입력 금리, 10년 기준)
-  const monthlyPayment = calculateMonthlyPayment(maxByIncome, creditLoanRate / 100, 10);
+  // 월 상환액 (만기일시상환: 월 이자만 납부, 만기에 원금 일시상환)
+  const monthlyPayment = (maxByIncome * (creditLoanRate / 100)) / 12;
 
   return {
     maxLoan: maxByIncome,
