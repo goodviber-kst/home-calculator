@@ -421,7 +421,13 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   }
 
   acquisitionTax = calculateAcquisitionTax(purchasePrice, isFirstTime);
-  const registrationFee = purchasePrice * registrationFeeRate;
+  let registrationFee = purchasePrice * registrationFeeRate;
+
+  // 목표가가 입력되었을 때는 목표가 기반으로 재계산
+  if (input.targetPropertyPrice > 0) {
+    acquisitionTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
+    registrationFee = input.targetPropertyPrice * registrationFeeRate;
+  }
 
   // 7. Final cost calculation
   const totalDeductions =
