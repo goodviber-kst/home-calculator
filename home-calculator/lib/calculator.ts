@@ -191,15 +191,12 @@ function calculateMaxLoanByDSR(
 }
 
 // Check first-time buyer eligibility (만원 단위)
+// 소득 제한 없이 항상 생애최초 조건 적용
 function isFirstTimeBuyerEligible(
-  annualIncome: number, // 만원 단위 세전 연봉
+  annualIncome: number, // 만원 단위 세전 연봉 (현재 미사용)
   isCouple: boolean
 ): boolean {
-  if (isCouple) {
-    return annualIncome <= 7000; // 7천만원
-  } else {
-    return annualIncome <= 5000; // 5천만원
-  }
+  return true; // 소득과 관계없이 항상 생애최초 조건 적용
 }
 
 // Get government loan products (만원 단위)
