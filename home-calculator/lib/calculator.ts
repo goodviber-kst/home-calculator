@@ -16,39 +16,19 @@ export function calculateAcquisitionTax(
   purchasePrice: number, // 만원 단위
   isFirstTime: boolean
 ): AcquisitionTaxBreakdown {
-  // Basic tax calculation: 2024-2026 rules (누진 계산)
-  let baseTax = 0;
-  if (purchasePrice < 60000) {
-    // 6억 미만: 1%
-    baseTax = purchasePrice * 0.01;
-  } else if (purchasePrice < 90000) {
-    // 6억~9억: 6억까지 1%, 초과분 2%
-    baseTax = 60000 * 0.01 + (purchasePrice - 60000) * 0.02;
-  } else {
-    // 9억 이상: 6억까지 1%, 6억~9억은 2%, 9억 초과분 3%
-    baseTax = 60000 * 0.01 + 30000 * 0.02 + (purchasePrice - 90000) * 0.03;
-  }
+  // Proportional tax calculation: 3.3% (includes education tax)
+  const baseTax = purchasePrice * 0.03;
+  const educationTax = purchasePrice * 0.003;
+  const subtotal = baseTax + educationTax;
 
-  // Education tax: 10% of base tax
-  const educationTax = baseTax * 0.1;
-
-  // Rural tax: 0.2% (MVP excludes this)
-  const specialTax = 0;
-
-  const subtotal = baseTax + educationTax + specialTax;
-
-  // First-time buyer exemption (만원 단위)
-  let exemption = 0;
-  if (isFirstTime) {
-    exemption = Math.min(subtotal, 200); // max 200만원
-  }
-
-  const finalTax = subtotal - exemption;
+  // First-time buyer exemption: 200만원
+  const exemption = isFirstTime ? 200 : 0;
+  const finalTax = Math.max(0, subtotal - exemption);
 
   return {
     baseTax,
     educationTax,
-    specialTax,
+    specialTax: 0,
     subtotal,
     exemption,
     finalTax,
