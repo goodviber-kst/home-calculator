@@ -298,9 +298,9 @@ function generateSimulations(
 ): SimulationResult[] {
   const simulations: SimulationResult[] = [];
 
-  // 1. 금리 시나리오 (현재, +1%, +1.5%)
+  // 1. 금리 시나리오 (0.1% 단위)
   const currentRate = input.interestRate ?? 4.0;
-  const ratesScenarios = [0, 1.0, 1.5];
+  const ratesScenarios = [0, 0.1, 0.2, 0.3, 0.5, 1.0];
 
   ratesScenarios.forEach((increase) => {
     const newRate = currentRate + increase;
@@ -312,7 +312,7 @@ function generateSimulations(
 
     simulations.push({
       type: 'interestRate',
-      label: increase === 0 ? `현재 금리 ${currentRate}%` : `금리 +${increase}%`,
+      label: increase === 0 ? `현재 금리 ${currentRate}%` : `금리 +${increase.toFixed(1)}%`,
       change: increase,
       originalValue: currentRate,
       newValue: newRate,
@@ -323,9 +323,9 @@ function generateSimulations(
     });
   });
 
-  // 2. 배우자/부부 소득 변화 시나리오
+  // 2. 배우자/부부 소득 변화 시나리오 (월 25만원 = 연 300만원 단위)
   if (input.isCouple) {
-    const incomeIncreases = [500, 1000]; // 만원 단위
+    const incomeIncreases = [300, 600]; // 만원 단위 (월 25, 50만원)
 
     incomeIncreases.forEach((increase) => {
       const newPreTaxAnnual = input.applicantPreTaxAnnual + input.spousePreTaxAnnual + increase * 12;
