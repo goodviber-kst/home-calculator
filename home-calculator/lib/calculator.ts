@@ -16,18 +16,20 @@ export function calculateAcquisitionTax(
   purchasePrice: number, // 만원 단위
   isFirstTime: boolean
 ): AcquisitionTaxBreakdown {
-  // Proportional tax: 3%
+  // Step 1: Calculate base tax (3%)
   const baseTax = purchasePrice * 0.03;
 
-  // First-time buyer exemption: 200만원 (from base tax)
+  // Step 2: Apply first-time buyer exemption (200만원)
   const exemption = isFirstTime ? 200 : 0;
-  const taxableBase = Math.max(0, baseTax - exemption);
+  const baseTaxAfterExemption = Math.max(0, baseTax - exemption);
 
-  // Education tax: 10% of taxable base (after exemption)
-  const educationTax = taxableBase * 0.1;
+  // Step 3: Calculate education tax (10% of base tax after exemption)
+  const educationTax = baseTaxAfterExemption * 0.1;
 
-  // Final total
-  const subtotal = taxableBase + educationTax;
+  // Step 4: Calculate totals
+  // subtotal = final amount after exemption
+  const subtotal = baseTaxAfterExemption + educationTax;
+  const finalTax = subtotal;
 
   return {
     baseTax,
@@ -35,7 +37,7 @@ export function calculateAcquisitionTax(
     specialTax: 0,
     subtotal,
     exemption,
-    finalTax: subtotal,
+    finalTax,
   };
 }
 
