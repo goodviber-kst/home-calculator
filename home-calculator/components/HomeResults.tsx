@@ -2,6 +2,7 @@
 
 import { CalculationResult } from '@/lib/types';
 import ResultCard from './ResultCard';
+import { useState } from 'react';
 
 interface HomeResultsProps {
   result: CalculationResult;
@@ -25,7 +26,58 @@ function formatWon(won: number): string {
   return `${Math.floor(won * 10000).toLocaleString()}원`;
 }
 
+function generateSummaryText(result: CalculationResult): string {
+  const summary = result.summary;
+  return `【AI 계산 분석 Summary】
+
+📊 DSR 기반 한도 (소득 기준)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 세전 연봉: ${formatWon(summary.dsr.annualIncome)}
+• DSR 비율: ${(summary.dsr.dsrRatio * 100).toFixed(0)}%
+• 월 최대 상환: ${formatWon(summary.dsr.maxMonthlyPayment)}
+• 결과 최대 대출: ${formatPrice(summary.dsr.resultMaxLoan)}
+
+🏠 LTV 기반 한도 (자산 기준)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 가용 자금: ${formatPrice(summary.ltv.availableBudget)}
+• LTV 비율: ${(summary.ltv.ltvRatio * 100).toFixed(0)}%
+• 결과 최대 대출: ${formatPrice(summary.ltv.resultMaxLoan)}
+
+⚖️ 최종 제약 분석
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• DSR 제약: ${formatPrice(summary.decision.maxLoanByDSR)}
+• LTV 제약: ${formatPrice(summary.decision.maxLoanByLTV)}
+• 규제 상한: ${formatPrice(summary.decision.mortgageCap)}
+• 최종 최대 대출: ${formatPrice(summary.decision.maxLoan)}
+• 제약 원인: ${summary.decision.reason}
+
+📍 규제 지역 정보
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 지역: ${summary.regulation.regionName}
+• 규제 여부: ${summary.regulation.isRegulated ? '✗ 규제' : '✓ 비규제'}
+• 주담대 상한: ${formatPrice(summary.regulation.mortgageCap)}
+${
+  summary.targetAnalysis
+    ? `
+🎯 목표가 달성 분석
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 목표 주택가: ${formatPrice(summary.targetAnalysis.targetPrice)}
+• 최대 구매 가능: ${formatPrice(summary.targetAnalysis.totalAvailable)}
+• ${summary.targetAnalysis.analysis}`
+    : ''
+}`;
+}
+
 export default function HomeResults({ result }: HomeResultsProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopySummary = () => {
+    const text = generateSummaryText(result);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="space-y-8">
       {/* HERO: Final Purchase Power Summary (한눈에 보기) */}
@@ -515,9 +567,22 @@ export default function HomeResults({ result }: HomeResultsProps) {
 
       {/* AI 해석용 Summary (로직 검증/수정 용도) */}
       <div className="rounded-lg border-2 border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-50 p-6">
-        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-          🤖 AI 해석용 Summary (로직 검증/수정)
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            🤖 AI 해석용 Summary (로직 검증/수정)
+          </h3>
+          <button
+            onClick={handleCopySummary}
+            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded transition-colors"
+          >
+            {copied ? '✓ 복사됨' : '📋 텍스트 복사'}
+          </button>
+        </div>
+
+        {/* 텍스트 형식 Summary (복사용) */}
+        <div className="mb-6 p-4 bg-white rounded-lg border border-purple-300 font-mono text-xs text-gray-800 whitespace-pre-wrap overflow-x-auto max-h-60 overflow-y-auto">
+          {generateSummaryText(result)}
+        </div>
 
         {/* DSR 제약 분석 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

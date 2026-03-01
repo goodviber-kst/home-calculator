@@ -133,20 +133,8 @@ function calculateCreditLoan(
     };
   }
 
-  // 신용점수에 따른 한도 결정 (300-999)
-  let loanLimit = 5000; // 기본 5000만원
-  if (creditScore >= 900) {
-    loanLimit = 15000; // 1.5억 (최우수)
-  } else if (creditScore >= 800) {
-    loanLimit = 10000; // 1억원
-  } else if (creditScore >= 750) {
-    loanLimit = 8000; // 8000만원
-  } else if (creditScore >= 700) {
-    loanLimit = 6000; // 6000만원
-  }
-
-  // 연봉의 50% 이상은 대출 불가 (과도한 영끌 방지)
-  const maxByIncome = Math.min(annualIncome * 0.5, loanLimit);
+  // 신용대출 한도: 연봉의 100%, 절대 상한 1억(10000만원)
+  const maxByIncome = Math.min(annualIncome * 1.0, 10000);
 
   // 월 상환액 (5% 고정금리, 10년 기준)
   const monthlyPayment = calculateMonthlyPayment(maxByIncome, 0.05, 10);
