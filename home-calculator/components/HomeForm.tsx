@@ -490,56 +490,10 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
                     <span className="text-sm font-medium">배우자 신용대출도 포함</span>
                   </label>
 
-                  {input.useSpouseCreditLoan && (
-                    <div className="space-y-2">
-                      <div className="text-sm font-semibold text-gray-700">배우자 신용점수</div>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="range"
-                          name="spouseCreditScore"
-                          min="300"
-                          max="999"
-                          step="1"
-                          value={input.spouseCreditScore}
-                          onChange={handleChange}
-                          className="flex-1 accent-orange-500"
-                        />
-                        <input
-                          type="number"
-                          name="spouseCreditScore"
-                          value={input.spouseCreditScore}
-                          onChange={handleChange}
-                          min="300"
-                          max="999"
-                          className="w-20 px-2 py-1.5 border border-orange-300 rounded text-center text-sm font-bold"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {input.spouseCreditScore >= 900
-                          ? '최우수 (900+): 최대 1.5억'
-                          : input.spouseCreditScore >= 800
-                            ? '우수 (800+): 최대 1억'
-                            : input.spouseCreditScore >= 750
-                              ? '양호 (750-799): 최대 8000만'
-                              : input.spouseCreditScore >= 700
-                                ? '보통 (700-749): 최대 6000만'
-                                : '기본 (~699): 최대 5000만'}
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </>
           )}
-
-          <div className="p-3 bg-white rounded border border-red-200 text-xs text-gray-600">
-            <div className="font-semibold mb-1">📌 신용대출 참고</div>
-            <ul className="space-y-0.5 list-disc list-inside">
-              <li>금리: 약 5% (변동)</li>
-              <li>한도: 신용점수 + 연봉의 50% 이내</li>
-              <li>다주택자 불가</li>
-            </ul>
-          </div>
         </div>
       </div>
 
