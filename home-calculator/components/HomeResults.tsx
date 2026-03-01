@@ -50,12 +50,6 @@ function generateSummaryText(result: CalculationResult): string {
 • 규제 상한: ${formatPrice(summary.decision.mortgageCap)}
 • 최종 최대 대출: ${formatPrice(summary.decision.maxLoan)}
 • 제약 원인: ${summary.decision.reason}
-
-📍 규제 지역 정보
-━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• 지역: ${summary.regulation.regionName}
-• 규제 여부: ${summary.regulation.isRegulated ? '✗ 규제' : '✓ 비규제'}
-• 주담대 상한: ${formatPrice(summary.regulation.mortgageCap)}
 ${
   summary.targetAnalysis
     ? `
@@ -212,76 +206,6 @@ export default function HomeResults({ result }: HomeResultsProps) {
           )}
         </div>
       )}
-
-      {/* Regulation & Credit Loan Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Region Regulation Info */}
-        <div className="rounded-lg border border-gray-200 p-6 bg-gradient-to-br from-orange-50 to-amber-50">
-          <h3 className="font-semibold text-lg mb-4">📍 {result.regulationInfo.regionName}</h3>
-          <div className="space-y-3 text-sm">
-            <div>
-              <span className="font-medium">규제 여부:</span>
-              <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${result.regulationInfo.isRegulated ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800'}`}>
-                {result.regulationInfo.isRegulated ? '✗ 규제 지역' : '✓ 비규제'}
-              </span>
-            </div>
-            <div>
-              <span className="font-medium">주담대 상한:</span>
-              <span className="ml-2">{result.regulationInfo.isRegulated ? '6억원' : '제한 없음'}</span>
-            </div>
-            <div>
-              <span className="font-medium">LTV 한도:</span>
-              <span className="ml-2">{(result.regulationInfo.ltvLimit * 100).toFixed(0)}%</span>
-            </div>
-            <div>
-              <span className="font-medium">스트레스 테스트:</span>
-              <span className="ml-2">{(result.regulationInfo.stressTestRate * 100).toFixed(1)}%</span>
-            </div>
-            <div className="pt-2 border-t border-amber-300">
-              <p className="text-xs text-gray-700">{result.regulationInfo.details}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Credit Loan Info */}
-        <div className={`rounded-lg border-2 p-6 ${result.creditLoanInfo.eligible ? 'border-red-300 bg-gradient-to-br from-red-50 to-rose-50' : 'border-gray-300 bg-gray-50'}`}>
-          <h3 className="font-semibold text-lg mb-4">💳 신용대출 (영끌)</h3>
-          {result.creditLoanInfo.eligible ? (
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="font-medium">신청자 한도:</span>
-                <span className="ml-2 text-lg font-bold text-red-600">{formatPrice(result.creditLoanInfo.maxLoan)}</span>
-              </div>
-              {result.spouseCreditLoanInfo?.eligible && (
-                <div>
-                  <span className="font-medium">배우자 한도:</span>
-                  <span className="ml-2 text-lg font-bold text-orange-600">{formatPrice(result.spouseCreditLoanInfo.maxLoan)}</span>
-                </div>
-              )}
-              {result.spouseCreditLoanInfo?.eligible && (
-                <div className="pt-1 border-t border-red-200">
-                  <span className="font-semibold">합산 한도:</span>
-                  <span className="ml-2 font-bold text-red-700">
-                    {formatPrice(result.creditLoanInfo.maxLoan + result.spouseCreditLoanInfo.maxLoan)}
-                  </span>
-                </div>
-              )}
-              <div>
-                <span className="font-medium">월 상환액:</span>
-                <span className="ml-2">{formatWon(result.creditLoanInfo.monthlyPayment)}</span>
-              </div>
-              <div className="pt-2 border-t border-red-300 bg-red-100 p-2 rounded text-xs">
-                <span className="font-semibold">⚠️ 주의:</span> 신용대출은 높은 금리와 리스크가 있습니다. 신중하게 사용하세요.
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-600">
-              <p className="font-medium mb-2">❌ 신용대출 불가</p>
-              <p>{result.creditLoanInfo.reason}</p>
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* 2x2 Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -597,25 +521,6 @@ export default function HomeResults({ result }: HomeResultsProps) {
             <div className="text-sm">
               <span className="font-semibold text-amber-800">🔍 제약 원인: </span>
               <span className="text-amber-900">{result.summary.decision.reason}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 규제 정보 */}
-        <div className="mt-6 p-4 bg-white rounded-lg border border-orange-300">
-          <div className="text-sm font-semibold text-orange-700 mb-2">📍 규제 지역 정보</div>
-          <div className="text-sm space-y-1">
-            <div className="flex justify-between">
-              <span>지역:</span>
-              <span className="font-semibold">{result.summary.regulation.regionName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>규제 여부:</span>
-              <span className="font-semibold">{result.summary.regulation.isRegulated ? '✗ 규제' : '✓ 비규제'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>주담대 상한:</span>
-              <span className="font-semibold">{formatPrice(result.summary.regulation.mortgageCap)}</span>
             </div>
           </div>
         </div>
