@@ -49,33 +49,33 @@ function getRegulationInfo(
       regionName: '서울 (투기과열지구)',
       isRegulated: true,
       mortgageCap: 60000, // 6억원 상한 (만원 단위: 60000만원 = 6억)
-      ltvLimit: isFirstTime ? 0.8 : 0.5, // 2024년 생애최초 80% 완화
+      ltvLimit: isFirstTime ? 0.7 : 0.6, // 생애최초 LTV 70%
       stressTestRate: 0.03, // 3.0% 스트레스 테스트
-      details: '투기과열지구. 생애최초는 LTV 80% (최대 6억), 일반은 50%.',
+      details: '투기과열지구. 생애최초는 LTV 70% (최대 6억), 일반은 60%.',
     },
     gyeonggi: {
       regionName: '경기 (조정대상지역)',
       isRegulated: true,
       mortgageCap: 60000, // 6억원 상한 (만원 단위: 60000만원 = 6억)
-      ltvLimit: isFirstTime ? 0.8 : 0.7,
+      ltvLimit: isFirstTime ? 0.7 : 0.6,
       stressTestRate: 0.03,
-      details: '조정대상지역. 주담대 6억 상한, 첫-구매자 LTV 80%',
+      details: '조정대상지역. 주담대 6억 상한, 첫-구매자 LTV 70%',
     },
     metropolitan: {
       regionName: '광역시 (조정)',
       isRegulated: true,
       mortgageCap: 60000, // 6억원 상한 (만원 단위: 60000만원 = 6억)
-      ltvLimit: isFirstTime ? 0.8 : 0.7,
+      ltvLimit: isFirstTime ? 0.7 : 0.6,
       stressTestRate: 0.03,
-      details: '조정대상지역. 서울과 동일한 규제 적용',
+      details: '조정대상지역. 서울과 동일한 규제 적용 (LTV 70%)',
     },
     other: {
       regionName: '기타 지역 (비규제)',
       isRegulated: false,
       mortgageCap: 999999, // 제한 없음
-      ltvLimit: isFirstTime ? 0.85 : 0.8,
+      ltvLimit: isFirstTime ? 0.8 : 0.7,
       stressTestRate: 0.015, // 1.5% 스트레스 테스트
-      details: '규제 없음. 일반적인 금융기준 적용',
+      details: '규제 없음. 일반적인 금융기준 적용 (LTV 80%)',
     },
   };
   return regulations[region];

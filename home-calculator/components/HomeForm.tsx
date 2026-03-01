@@ -388,10 +388,10 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="seoul">서울 (투기과열 — 생애최초 LTV 80%, 한도 6억)</option>
-              <option value="gyeonggi">경기 (조정대상 — 생애최초 LTV 80%, 한도 6억)</option>
-              <option value="metropolitan">광역시 (조정 — 생애최초 LTV 80%, 한도 6억)</option>
-              <option value="other">그외지방 (비규제 — LTV 85%, 한도 없음)</option>
+              <option value="seoul">서울 (투기과열 — LTV 70%, 한도 6억)</option>
+              <option value="gyeonggi">경기 (조정대상 — LTV 70%, 한도 6억)</option>
+              <option value="metropolitan">광역시 (조정 — LTV 70%, 한도 6억)</option>
+              <option value="other">그외지방 (비규제 — LTV 80%, 한도 없음)</option>
             </select>
           </div>
 
