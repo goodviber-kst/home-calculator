@@ -538,7 +538,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   // 7. Final cost calculation (항상 권장가 기준으로 계산)
   const totalDeductions =
     input.emergencyFund +
-    input.brokerageFee +
+    (input.brokerageFee ?? 0) +
     input.interiorCost +
     input.movingCost +
     acquisitionTax.finalTax +
@@ -671,7 +671,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     movingCost: input.movingCost,
     acquisitionTax: acquisitionTax.finalTax,
     registrationFee,
-    brokerageFee: input.brokerageFee,
+    brokerageFee: input.brokerageFee ?? 0,
   };
 
   // 목표 주택가 달성 가능성 분석
