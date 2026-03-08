@@ -535,19 +535,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   let brokerageFee = calculateBrokerageFee(purchasePrice);
 
   // Calculate costs for recommended price (before target price override)
-  const recommendedAcquisitionTax = acquisitionTax;
-  const recommendedRegistrationFee = registrationFee;
-  const recommendedBrokerageFee = brokerageFee;
-  const recommendedPriceForCosts = purchasePrice;
-
-  // 목표가가 입력되었을 때는 목표가 기반으로 재계산
-  if (input.targetPropertyPrice > 0) {
-    acquisitionTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
-    registrationFee = input.targetPropertyPrice * registrationFeeRate;
-    brokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
-  }
-
-  // 7. Final cost calculation
+  // 7. Final cost calculation (항상 권장가 기준으로 계산)
   const totalDeductions =
     input.emergencyFund +
     input.brokerageFee +
@@ -555,6 +543,16 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     input.movingCost +
     acquisitionTax.finalTax +
     registrationFee;
+
+  // 취득세 표시용: 목표가가 있으면 목표가 기준으로 재계산 (totalDeductions에는 영향 없음)
+  const recommendedAcquisitionTax = acquisitionTax;
+  const recommendedRegistrationFee = registrationFee;
+  const recommendedBrokerageFee = brokerageFee;
+  if (input.targetPropertyPrice > 0) {
+    acquisitionTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
+    registrationFee = input.targetPropertyPrice * registrationFeeRate;
+    brokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
+  }
 
   const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
@@ -679,30 +677,13 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   // 목표 주택가 달성 가능성 분석
   const targetPropertyFeasibility =
     input.targetPropertyPrice > 0
-      ? (() => {
-          const targetAcqTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
-          const targetRegFee = input.targetPropertyPrice * registrationFeeRate;
-          const targetBrokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
-          const targetTotalCosts =
-            targetAcqTax.finalTax + targetRegFee + targetBrokerageFee;
-
-          // Cost difference: target price vs recommended price
-          const recommendedTotalCosts =
-            recommendedAcquisitionTax.finalTax + recommendedRegistrationFee + recommendedBrokerageFee;
-          const additionalCosts = Math.max(0, targetTotalCosts - recommendedTotalCosts);
-
-          // Actual shortfall includes additional costs
-          const baseShortfall = input.targetPropertyPrice - yeongkkulPrice;
-          const totalShortfall = baseShortfall + additionalCosts;
-
-          return {
-            targetPrice: input.targetPropertyPrice,
-            achievable: yeongkkulPrice >= input.targetPropertyPrice && additionalCosts <= 0,
-            shortfall: totalShortfall,
-            maxAffordable: yeongkkulPrice,
-            targetAcquisitionTax: targetAcqTax,
-          };
-        })()
+      ? {
+          targetPrice: input.targetPropertyPrice,
+          achievable: yeongkkulPrice >= input.targetPropertyPrice,
+          shortfall: input.targetPropertyPrice - yeongkkulPrice,
+          maxAffordable: yeongkkulPrice,
+          targetAcquisitionTax: calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime),
+        }
       : null;
 
   // 공동명의 vs 단독명의 취득세 비교 (#13)
