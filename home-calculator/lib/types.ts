@@ -16,6 +16,7 @@ export interface HomeCalculatorInput {
   emergencyFund: number; // 만원
   interiorCost: number; // 만원
   movingCost: number; // 만원
+  brokerageFee: number; // 중개수수료 (만원, 협의 가능)
 
   // Section 4: Region & Loan
   targetRegion: 'seoul' | 'gyeonggi' | 'metropolitan' | 'other';

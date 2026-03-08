@@ -365,7 +365,7 @@ export default function HomeResults({ result }: HomeResultsProps) {
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>여유자금 <span className="text-xs text-gray-400">(복비 포함)</span></span>
+                    <span>여유자금</span>
                     <span className="font-semibold">
                       {formatWon(result.costBreakdown.emergencyFund)}
                     </span>
@@ -394,6 +394,14 @@ export default function HomeResults({ result }: HomeResultsProps) {
                       {formatWon(result.costBreakdown.registrationFee)}
                     </span>
                   </div>
+                  {result.costBreakdown.brokerageFee > 0 && (
+                    <div className="flex justify-between">
+                      <span>중개수수료</span>
+                      <span className="font-semibold">
+                        {formatWon(result.costBreakdown.brokerageFee)}
+                      </span>
+                    </div>
+                  )}
                   <div className="border-t border-gray-300 pt-2 flex justify-between font-bold">
                     <span>합계</span>
                     <span>{formatWon(result.totalDeductions)}</span>

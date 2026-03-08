@@ -509,10 +509,9 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     const registrationFee = purchasePrice * registrationFeeRate;
     const brokerageFee = calculateBrokerageFee(purchasePrice);
 
-    // 복비를 여유자금에 포함하여 차감 (별도 항목 없음)
     const totalDeductions =
       input.emergencyFund +
-      brokerageFee +
+      input.brokerageFee +
       input.interiorCost +
       input.movingCost +
       acquisitionTax.finalTax +
@@ -548,10 +547,10 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     brokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
   }
 
-  // 7. Final cost calculation (복비는 여유자금에 포함, 별도 항목 없음)
+  // 7. Final cost calculation
   const totalDeductions =
     input.emergencyFund +
-    brokerageFee +
+    input.brokerageFee +
     input.interiorCost +
     input.movingCost +
     acquisitionTax.finalTax +
@@ -665,17 +664,16 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     loanTermYears: input.loanTermYears,
   };
 
-  // 복비를 여유자금에 포함하여 표시
   const costBreakdown = {
     savings: input.savings,
     parentGift: input.parentGift,
     otherAssets: input.otherAssets,
-    emergencyFund: input.emergencyFund + brokerageFee, // 복비 포함
+    emergencyFund: input.emergencyFund,
     interiorCost: input.interiorCost,
     movingCost: input.movingCost,
     acquisitionTax: acquisitionTax.finalTax,
     registrationFee,
-    brokerageFee: 0, // 여유자금에 통합됨
+    brokerageFee: input.brokerageFee,
   };
 
   // 목표 주택가 달성 가능성 분석

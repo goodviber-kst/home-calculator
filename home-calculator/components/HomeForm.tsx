@@ -69,7 +69,7 @@ function MoneyField({
             key={p}
             type="button"
             onClick={() => onChange(name, value + p)}
-            className="text-xs px-2 py-0.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 rounded transition-colors"
+            className="text-xs px-2 py-1.5 bg-gray-100 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 rounded transition-colors"
           >
             {fmtBtn(p)}
           </button>
@@ -78,7 +78,7 @@ function MoneyField({
           <button
             type="button"
             onClick={() => onChange(name, 0)}
-            className="text-xs px-2 py-0.5 bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded transition-colors"
+            className="text-xs px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 rounded transition-colors"
           >
             초기화
           </button>
@@ -115,16 +115,17 @@ function SectionHeader({
 export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps) {
   const [input, setInput] = useState<HomeCalculatorInput>({
     isCouple: false,
-    applicantIncome: 400,
-    applicantPreTaxAnnual: 5000,
+    applicantIncome: 0,
+    applicantPreTaxAnnual: 0,
     spouseIncome: 0,
     spousePreTaxAnnual: 0,
-    savings: 30000,
+    savings: 0,
     parentGift: 0,
     otherAssets: 0,
-    emergencyFund: 1000,
-    interiorCost: 1000,
-    movingCost: 100,
+    emergencyFund: 0,
+    interiorCost: 0,
+    movingCost: 0,
+    brokerageFee: 0,
     targetRegion: 'seoul',
     loanTermYears: 30,
     useLifestyleLoan: false,
@@ -274,6 +275,11 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
             presets={[50, 100, 200, 300]}
             hint="실수령액 (세금 제외)"
           />
+          {input.applicantIncome > 0 && (
+            <p className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded -mt-2">
+              세전 연봉 추정: ~{(input.applicantIncome * 15).toLocaleString()}~{(input.applicantIncome * 17).toLocaleString()}만원
+            </p>
+          )}
           <MoneyField
             label="세전 연봉*"
             name="applicantPreTaxAnnual"
@@ -281,7 +287,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
             onChange={handleMoney}
             required
             presets={[500, 1000, 2000, 5000]}
-            hint="DSR·생애최초 자격 계산에 사용"
+            hint="DSR(총부채원리금상환비율) 계산에 사용. 은행 대출 한도의 핵심 기준."
           />
         </div>
 
@@ -345,7 +351,7 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <SectionHeader num={3} color="bg-orange-600" title="여유 비용" />
         <p className="text-sm text-gray-500 mb-4">
-          예상치 못한 지출 대비, 자산에서 먼저 차감합니다. (취득세는 자동 계산)
+          예상치 못한 지출 대비, 자산에서 먼저 차감합니다. (취득세·복비는 자동 계산)
         </p>
         <div className="space-y-5">
           <MoneyField
@@ -370,6 +376,14 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
             onChange={handleMoney}
             presets={[50, 100, 200, 500]}
           />
+          <MoneyField
+            label="중개수수료 (복비)"
+            name="brokerageFee"
+            value={input.brokerageFee}
+            onChange={handleMoney}
+            presets={[100, 300, 500, 1000]}
+            hint="협의 가능 · 법정 상한: 6억 미만 0.4%, 6~9억 0.5%, 9억 초과 0.9%"
+          />
         </div>
       </div>
 
@@ -380,24 +394,27 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
 
           {/* 목표 지역 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">목표 지역</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              목표 지역
+              <span className="text-xs font-normal text-gray-400 ml-1">(LTV=담보인정비율, 스트레스금리=은행 DSR 심사 시 가산금리)</span>
+            </label>
             <select
               name="targetRegion"
               value={input.targetRegion}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="seoul">서울 (투기과열 — LTV 70%, 한도 6억)</option>
-              <option value="gyeonggi">경기 (조정대상 — LTV 70%, 한도 6억)</option>
-              <option value="metropolitan">광역시 (조정 — LTV 70%, 한도 6억)</option>
-              <option value="other">그외지방 (비규제 — LTV 80%, 한도 없음)</option>
+              <option value="seoul">서울 (투기과열 — LTV 70%, 한도 6억, 스트레스금리 +3%p)</option>
+              <option value="gyeonggi">경기 (조정대상 — LTV 70%, 한도 6억, 스트레스금리 +3%p)</option>
+              <option value="metropolitan">광역시 (조정 — LTV 70%, 한도 6억, 스트레스금리 +3%p)</option>
+              <option value="other">그외지방 (비규제 — LTV 80%, 한도 없음, 스트레스금리 +1.5%p)</option>
             </select>
           </div>
 
           {/* 대출 기간 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">대출 기간</label>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {([10, 15, 20, 30, 40, 50] as const).map((y) => (
                 <button
                   key={y}
@@ -456,6 +473,9 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
       {/* ── Section 5: 신용대출 (영끌) ──────────────────────────────────── */}
       <div className="bg-red-50 rounded-lg border border-red-200 p-6">
         <SectionHeader num={5} color="bg-red-600" title="신용대출 (영끌 옵션)" />
+        <p className="text-xs text-red-700 mb-3 -mt-2">
+          영끌 = &quot;영혼까지 끌어모은다&quot;. 주담대 외에 신용대출까지 동원하여 최대한 대출을 받는 전략입니다.
+        </p>
 
         <div className="space-y-4">
           {/* 신청자 신용대출 토글 */}
