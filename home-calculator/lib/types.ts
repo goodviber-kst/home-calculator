@@ -202,10 +202,14 @@ export interface CalculationResult {
     movingCost: number;
     acquisitionTax: number;
     registrationFee: number;
+    brokerageFee: number;
   };
 
   // AI 해석용 Summary
   summary: CalculationSummary;
+
+  // Joint vs single ownership tax comparison
+  taxComparisonSavings?: number; // 공동명의 시 취득세 절감액 (만원)
 
   // Simulations
   simulations?: SimulationResult[];
