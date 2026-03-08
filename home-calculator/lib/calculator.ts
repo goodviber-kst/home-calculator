@@ -13,31 +13,47 @@ import {
 } from './types';
 
 // Calculate acquisition tax (취득세) — 모든 값 만원 단위
+// 2025년 주택 유상취득 기준: 6억 이하 1%, 6~9억 구간 비례(1~3%), 9억 초과 3%
 export function calculateAcquisitionTax(
   purchasePrice: number, // 만원 단위
   isFirstTime: boolean
 ): AcquisitionTaxBreakdown {
-  // 107,000만원 입력 예시:
-  // baseTax = 107,000 × 0.03 = 3,210만원
-  // exemption = 200만원 (생애최초)
-  // baseTaxAfterExemption = 3,210 - 200 = 3,010만원
-  // educationTax = 3,010 × 0.1 = 301만원
-  // finalTax = 3,010 + 301 = 3,311만원
+  let taxRate: number;
+  const priceInEok = purchasePrice / 10000;
 
-  const baseTax = purchasePrice * 0.03;
+  if (purchasePrice <= 60000) {
+    taxRate = 0.01; // 6억 이하: 1%
+  } else if (purchasePrice <= 90000) {
+    // 6~9억 구간: 선형 보간 (6억=1%, 9억=3%)
+    taxRate = (priceInEok * 2 / 3 - 3) / 100;
+  } else {
+    taxRate = 0.03; // 9억 초과: 3%
+  }
+
+  const baseTax = purchasePrice * taxRate;
   const exemption = isFirstTime ? 200 : 0;
-  const baseTaxAfterExemption = baseTax - exemption;
+  const baseTaxAfterExemption = Math.max(0, baseTax - exemption);
   const educationTax = baseTaxAfterExemption * 0.1;
   const subtotal = baseTaxAfterExemption + educationTax;
 
   return {
-    baseTax: baseTax,
-    educationTax: educationTax,
+    baseTax,
+    educationTax,
     specialTax: 0,
-    subtotal: subtotal,
-    exemption: exemption,
+    subtotal,
+    exemption,
     finalTax: subtotal,
   };
+}
+
+// Calculate brokerage fee (중개수수료) — 만원 단위
+// 2024년 주거용 매매 기준 법정 요율
+function calculateBrokerageFee(purchasePrice: number): number {
+  if (purchasePrice < 5000) return Math.min(purchasePrice * 0.006, 25);
+  if (purchasePrice < 20000) return Math.min(purchasePrice * 0.005, 80);
+  if (purchasePrice < 60000) return purchasePrice * 0.004;
+  if (purchasePrice < 90000) return purchasePrice * 0.005;
+  return purchasePrice * 0.009; // 9억 이상 법정 상한 0.9%
 }
 
 // Get regulation info by region (2025년 규제 기준)
@@ -175,15 +191,6 @@ function calculateMaxLoanByDSR(
   );
 }
 
-// Check first-time buyer eligibility (만원 단위)
-// 소득 제한 없이 항상 생애최초 조건 적용
-function isFirstTimeBuyerEligible(
-  annualIncome: number, // 만원 단위 세전 연봉 (현재 미사용)
-  isCouple: boolean
-): boolean {
-  return true; // 소득과 관계없이 항상 생애최초 조건 적용
-}
-
 // Get government loan products (만원 단위)
 function getGovernmentLoans(
   purchasePrice: number, // 만원 단위
@@ -241,32 +248,32 @@ function getRegionalFeasibility(
   const regions: RegionalFeasibility[] = [
     {
       region: '서울 (투기과열)',
-      ltvBase: 0.5,
-      ltvFirst: isFirstTime ? 0.8 : 0.5,
+      ltvBase: 0.6,
+      ltvFirst: isFirstTime ? 0.7 : 0.6,
       maxPriceByLTV: 0,
       feasible: false,
       reason: '',
     },
     {
       region: '경기 (조정대상)',
-      ltvBase: 0.7,
-      ltvFirst: isFirstTime ? 0.8 : 0.7,
+      ltvBase: 0.6,
+      ltvFirst: isFirstTime ? 0.7 : 0.6,
       maxPriceByLTV: 0,
       feasible: false,
       reason: '',
     },
     {
       region: '광역시 (조정)',
-      ltvBase: 0.7,
-      ltvFirst: isFirstTime ? 0.8 : 0.7,
+      ltvBase: 0.6,
+      ltvFirst: isFirstTime ? 0.7 : 0.6,
       maxPriceByLTV: 0,
       feasible: false,
       reason: '',
     },
     {
       region: '그외지방 (비규제)',
-      ltvBase: 0.8,
-      ltvFirst: 0.8,
+      ltvBase: 0.7,
+      ltvFirst: isFirstTime ? 0.8 : 0.7,
       maxPriceByLTV: 0,
       feasible: false,
       reason: '',
@@ -466,16 +473,13 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     : input.applicantIncome;
   const annualIncomeCouple = monthlyIncomeCouple * 12;
 
-  // 2. Calculate pre-tax annual income (세전 연봉) for DSR and first-time eligibility
+  // 2. Calculate pre-tax annual income (세전 연봉) for DSR
   const totalPreTaxAnnual = input.isCouple
     ? input.applicantPreTaxAnnual + input.spousePreTaxAnnual
     : input.applicantPreTaxAnnual;
 
-  // 3. Check first-time buyer eligibility using pre-tax annual income
-  const isFirstTime = isFirstTimeBuyerEligible(
-    totalPreTaxAnnual,
-    input.isCouple
-  );
+  // 3. 생애최초 조건 항상 적용 (현재 폼에서 별도 선택 없음)
+  const isFirstTime = true;
 
   // 4. Calculate total assets
   const totalAssets = input.savings + input.parentGift + input.otherAssets;
@@ -483,35 +487,47 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
   // 5. Calculate LTV by region
   const ltv = getLTVByRegion(input.targetRegion, isFirstTime);
 
-  // 6. Calculate registration fee (0.4%)
+  // 6. Get regulation info early (needed for stress test rate)
+  const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
+  const rate = (input.interestRate ?? 4.0) / 100; // 소수 형태
+  // 규제지역은 스트레스 금리를 가산하여 DSR 계산 (실제 은행 심사 기준)
+  const dsrRate = regulationInfo.isRegulated
+    ? rate + regulationInfo.stressTestRate
+    : rate;
+
   const registrationFeeRate = 0.004;
 
+  // 1. Auto-estimate brokerage fee based on initial estimate (4억)
+  // This helps account for brokerage fee in emergencyFund calculation
+  const estimatedBrokerageFeeForEmergency = calculateBrokerageFee(40000);
+  const emergencyFundWithBrokerage = input.emergencyFund + estimatedBrokerageFeeForEmergency;
+
   // Iterate to find stable purchase price (acquisition tax depends on price)
-  // 만원 단위로 통일
   let purchasePrice = 40000; // Start with 4억 (만원 단위)
   let acquisitionTax: AcquisitionTaxBreakdown;
   let previousPrice = 0;
   let iterations = 0;
 
   while (Math.abs(purchasePrice - previousPrice) > 100 && iterations < 10) {
-    // 100만원 수렴 임계값
     previousPrice = purchasePrice;
     acquisitionTax = calculateAcquisitionTax(purchasePrice, isFirstTime);
     const registrationFee = purchasePrice * registrationFeeRate;
+    const brokerageFee = calculateBrokerageFee(purchasePrice);
 
     const totalDeductions =
-      input.emergencyFund +
+      emergencyFundWithBrokerage +
       input.interiorCost +
       input.movingCost +
       acquisitionTax.finalTax +
-      registrationFee;
+      registrationFee +
+      brokerageFee;
 
     const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
-    // Calculate max loan using pre-tax annual income for DSR
     const maxLoanByDSR = calculateMaxLoanByDSR(
       totalPreTaxAnnual,
-      input.loanTermYears
+      input.loanTermYears,
+      dsrRate
     );
     const maxLoanByLTV = availableBudget / (1 - ltv);
 
@@ -521,31 +537,37 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
 
   acquisitionTax = calculateAcquisitionTax(purchasePrice, isFirstTime);
   let registrationFee = purchasePrice * registrationFeeRate;
+  let brokerageFee = calculateBrokerageFee(purchasePrice);
+
+  // Calculate costs for recommended price (before target price override)
+  const recommendedAcquisitionTax = acquisitionTax;
+  const recommendedRegistrationFee = registrationFee;
+  const recommendedBrokerageFee = brokerageFee;
+  const recommendedPriceForCosts = purchasePrice;
 
   // 목표가가 입력되었을 때는 목표가 기반으로 재계산
   if (input.targetPropertyPrice > 0) {
     acquisitionTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
     registrationFee = input.targetPropertyPrice * registrationFeeRate;
+    brokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
   }
 
   // 7. Final cost calculation
   const totalDeductions =
-    input.emergencyFund +
+    emergencyFundWithBrokerage +
     input.interiorCost +
     input.movingCost +
     acquisitionTax.finalTax +
-    registrationFee;
+    registrationFee +
+    brokerageFee;
 
   const availableBudget = Math.max(0, totalAssets - totalDeductions);
 
-  // 8. Calculate max loans using pre-tax annual income for DSR
-  const regulationInfo = getRegulationInfo(input.targetRegion, isFirstTime);
-  const rate = (input.interestRate ?? 4.0) / 100; // 소수 형태
-
+  // 8. Calculate max loans using pre-tax annual income for DSR (with stress test)
   const maxLoanByDSR = calculateMaxLoanByDSR(
     totalPreTaxAnnual,
     input.loanTermYears,
-    rate
+    dsrRate
   );
   const maxLoanByLTV = (availableBudget * ltv) / (1 - ltv);
 
@@ -656,19 +678,47 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     movingCost: input.movingCost,
     acquisitionTax: acquisitionTax.finalTax,
     registrationFee,
+    brokerageFee,
   };
 
   // 목표 주택가 달성 가능성 분석
   const targetPropertyFeasibility =
     input.targetPropertyPrice > 0
-      ? {
-          targetPrice: input.targetPropertyPrice,
-          achievable: yeongkkulPrice >= input.targetPropertyPrice,
-          shortfall: input.targetPropertyPrice - yeongkkulPrice,
-          maxAffordable: yeongkkulPrice,
-          targetAcquisitionTax: calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime),
-        }
+      ? (() => {
+          const targetAcqTax = calculateAcquisitionTax(input.targetPropertyPrice, isFirstTime);
+          const targetRegFee = input.targetPropertyPrice * registrationFeeRate;
+          const targetBrokerageFee = calculateBrokerageFee(input.targetPropertyPrice);
+          const targetTotalCosts =
+            targetAcqTax.finalTax + targetRegFee + targetBrokerageFee;
+
+          // Cost difference: target price vs recommended price
+          const recommendedTotalCosts =
+            recommendedAcquisitionTax.finalTax + recommendedRegistrationFee + recommendedBrokerageFee;
+          const additionalCosts = Math.max(0, targetTotalCosts - recommendedTotalCosts);
+
+          // Actual shortfall includes additional costs
+          const baseShortfall = input.targetPropertyPrice - yeongkkulPrice;
+          const totalShortfall = baseShortfall + additionalCosts;
+
+          return {
+            targetPrice: input.targetPropertyPrice,
+            achievable: yeongkkulPrice >= input.targetPropertyPrice && additionalCosts <= 0,
+            shortfall: totalShortfall,
+            maxAffordable: yeongkkulPrice,
+            targetAcquisitionTax: targetAcqTax,
+          };
+        })()
       : null;
+
+  // 공동명의 vs 단독명의 취득세 비교 (#13)
+  let taxComparisonSavings: number | undefined;
+  if (input.isCouple) {
+    const priceForTax = input.targetPropertyPrice > 0 ? input.targetPropertyPrice : recommendedPrice;
+    const singleTax = calculateAcquisitionTax(priceForTax, isFirstTime).finalTax;
+    const jointTax = 2 * calculateAcquisitionTax(priceForTax / 2, isFirstTime).finalTax;
+    const savings = singleTax - jointTax;
+    if (savings > 0) taxComparisonSavings = savings;
+  }
 
   // Generate summary for AI interpretation
   const summary = generateSummary(
@@ -712,6 +762,7 @@ export function calculate(input: HomeCalculatorInput): CalculationResult {
     targetPropertyPrice: input.targetPropertyPrice ?? 0,
     spouseCreditLoanInfo,
     targetPropertyFeasibility,
+    taxComparisonSavings,
     summary,
     realDSRWithCreditLoan,
     creditLoanDSRWarning: creditLoanDSRWarning || undefined,
