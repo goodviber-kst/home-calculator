@@ -484,18 +484,18 @@ export default function HomeForm({ onSubmit, isLoading = false }: HomeFormProps)
                 <input
                   type="range"
                   name="creditLoanRate"
-                  min="3.0"
-                  max="10.0"
+                  min="0"
+                  max="7.0"
                   step="0.1"
                   value={input.creditLoanRate}
                   onChange={handleChange}
                   className="w-full accent-red-500"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>3.0%</span>
-                  <span>5.0%</span>
+                  <span>0%</span>
+                  <span>2.0%</span>
+                  <span>4.0%</span>
                   <span>7.0%</span>
-                  <span>10.0%</span>
                 </div>
               </div>
 
