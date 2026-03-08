@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculate } from '@/lib/calculator';
 import { HomeCalculatorInput } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
 }
 
 async function saveCalculation(input: HomeCalculatorInput, result: any) {
+  const supabase = getSupabase();
+  if (!supabase) return; // Supabase 미설정 시 조용히 스킵
+
   try {
     await supabase.from('calculations').insert({
       region: input.targetRegion,
